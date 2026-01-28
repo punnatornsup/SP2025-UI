@@ -1,0 +1,55 @@
+.topbar{
+  width: 100%;
+  height: var(--topbar-h);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 var(--page-pad);
+  box-sizing: border-box;
+
+  background: transparent;
+}
+
+.topbarLeft{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* ✅ ฝั่งขวา */
+.topbarRight{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* ✅ กลุ่ม LOGO + Title อยู่ข้างๆ กระดิ่ง */
+.topbarBrand{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.bellBtn{
+  width: 44px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 2px solid rgba(0,0,0,0.9);
+  background: #fff;
+}
+.miniLogo{
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  object-fit: contain;  /* ✅ ไม่บิดรูป */
+  background: rgba(0,0,0,0.06); /* optional */
+  padding: 4px; /* optional */
+}

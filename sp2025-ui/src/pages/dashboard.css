@@ -1,0 +1,252 @@
+.dashRoot {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dashHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dashTitle {
+  margin: 0;
+  font-size: 18px;
+}
+
+.dashGrid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.dashLeft,
+.dashRight {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.cardTitle {
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.topKwList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.topKwRow {
+  display: grid;
+  grid-template-columns: 1fr 140px 36px;
+  gap: 10px;
+  align-items: center;
+}
+
+.topKwLabel {
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topKwBarWrap {
+  height: 10px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.topKwBar {
+  height: 100%;
+  background: rgba(0,0,0,0.55);
+  border-radius: 999px;
+}
+
+.topKwCount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.sevList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sevRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sevBadge {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.10);
+}
+
+.sev_CRITICAL { background: rgba(220,0,0,0.10); }
+.sev_HIGH     { background: rgba(255,140,0,0.12); }
+.sev_MED      { background: rgba(255,200,0,0.14); }
+.sev_LOW      { background: rgba(0,160,80,0.12); }
+
+.sevValue {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.searchInput {
+  flex: 1;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  padding: 0 12px;
+  outline: none;
+}
+
+.searchMeta {
+  min-width: 110px;
+  text-align: right;
+  color: rgba(0,0,0,0.6);
+  font-size: 13px;
+}
+
+.tableCard {
+  padding: 0;
+  overflow: hidden;
+}
+
+.tableWrap {
+  width: 100%;
+  overflow: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 980px;
+}
+
+.table thead th {
+  text-align: left;
+  font-size: 12px;
+  padding: 12px 14px;
+  background: rgba(0,0,0,0.03);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  vertical-align: top;
+  font-size: 13px;
+}
+
+.tdTopic {
+  max-width: 360px;
+}
+
+.tagWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.06);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.status {
+  font-weight: 700;
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  display: inline-block;
+  border: 1px solid rgba(0,0,0,0.10);
+}
+
+.status.pending { background: rgba(255, 200, 0, 0.18); }
+.status.ok      { background: rgba(0, 160, 80, 0.18); }
+
+.emptyCell {
+  text-align: center;
+  padding: 18px !important;
+  color: rgba(0,0,0,0.55);
+}
+
+.tableFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  background: #fff;
+}
+
+.footerLeft,
+.footerRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.muted {
+  color: rgba(0,0,0,0.55);
+  font-size: 13px;
+}
+
+.select {
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.12);
+  padding: 0 10px;
+}
+
+.pageBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+  cursor: pointer;
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  font-variant-numeric: tabular-nums;
+  color: rgba(0,0,0,0.7);
+}
+.clickRow { cursor: pointer; }
+.clickRow:hover { background: rgba(0,0,0,0.03); }

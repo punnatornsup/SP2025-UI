@@ -1,0 +1,149 @@
+.sidebar{
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: var(--sidebar-w);     /* ✅ ใช้ var เดียวกับ layout */
+  height: 100vh;
+  z-index: 1100;
+
+  background: #0b1220;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  box-sizing: border-box;
+
+  transition: width 180ms ease;
+}
+
+.sidebarLogo{
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.logoBox{
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 11px;
+}
+
+.sidebarNav{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  align-items: center;
+}
+
+.navIconBtn{
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  text-decoration: none;
+  color: rgba(255,255,255,0.88);
+  background: transparent;
+}
+
+.navIconBtn:hover{
+  background: rgba(255,255,255,0.08);
+}
+
+.navIconBtn.active{
+  background: rgba(255,255,255,0.16);
+  color: #fff;
+}
+
+.navIcon{
+  display: grid;
+  place-items: center;
+}
+
+/* ✅ ซ่อน label ตอน collapsed */
+.navLabel{
+  display: none;
+  margin-left: 10px;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ✅ ตอน expanded: ปุ่มยาวขึ้น + จัดชิดซ้าย + โชว์ label */
+.sidebar.sidebar--expanded{
+  align-items: stretch;
+  padding: 12px 10px;
+}
+
+.sidebar.sidebar--expanded .sidebarNav{
+  align-items: stretch;
+}
+
+.sidebar.sidebar--expanded .navIconBtn{
+  width: 100%;
+  justify-content: flex-start;
+  padding: 0 12px;
+}
+
+.sidebar.sidebar--expanded .navLabel{
+  display: inline;
+}
+.sidebarLogo{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+/* กล่องโลโก้ */
+.logoBox{
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgb(253, 253, 253);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+/* รูปโลโก้ */
+.logoImg{
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+}
+
+/* ชื่อข้างโลโก้: ซ่อนตอน collapsed */
+.logoText{
+  display: none;
+  line-height: 1.05;
+  color: rgba(255,255,255,0.92);
+}
+
+.logoTextTop{
+  font-weight: 800;
+  font-size: 16px;
+}
+
+/* ✅ แสดงชื่อเฉพาะตอน expanded */
+.sidebar.sidebar--expanded .sidebarLogo{
+  justify-content: flex-start;
+  padding: 0 8px;
+}
+
+.sidebar.sidebar--expanded .logoText{
+  display: block;
+}

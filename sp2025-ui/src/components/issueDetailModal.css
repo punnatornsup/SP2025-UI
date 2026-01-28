@@ -1,0 +1,264 @@
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 999;
+}
+
+.modalShell {
+  position: relative;
+  width: min(1100px, 100%);
+  height: min(720px, 100%);
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.14);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  height: 56px;
+  padding: 0 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modalTitle {
+  font-weight: 900;
+  font-size: 16px;
+}
+
+.closeBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+  cursor: pointer;
+}
+
+.modalBody {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 14px;
+  padding: 14px;
+  min-height: 0;
+}
+
+.modalLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.detailItem {
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: rgba(0,0,0,0.02);
+}
+
+.detailItem.fullSpan {
+  grid-column: 1 / -1;
+}
+
+.detailLabel {
+  font-size: 12px;
+  color: rgba(0,0,0,0.6);
+  margin-bottom: 6px;
+}
+
+.detailValue {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  word-break: break-word;
+}
+
+.urlLink {
+  font-weight: 800;
+  color: rgba(0,0,0,0.85);
+  text-decoration: underline;
+}
+
+.sevPill {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(0,0,0,0.04);
+}
+
+.sev_CRITICAL { background: rgba(220,0,0,0.12); }
+.sev_HIGH     { background: rgba(255,140,0,0.14); }
+.sev_MED      { background: rgba(255,200,0,0.16); }
+.sev_LOW      { background: rgba(0,160,80,0.14); }
+
+.contentBox {
+  flex: 1;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.contentHeader {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  background: rgba(0,0,0,0.02);
+}
+
+.contentTitle {
+  font-weight: 900;
+}
+
+.contentMeta {
+  font-size: 12px;
+  color: rgba(0,0,0,0.6);
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.contentScroll {
+  padding: 12px;
+  height: 100%;
+  overflow: auto;
+  white-space: pre-wrap;
+  line-height: 1.45;
+  font-size: 13px;
+}
+
+.modalRight {
+  min-height: 0;
+}
+
+.sideCard {
+  height: 100%;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 16px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.kvRow {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.kvKey {
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(0,0,0,0.65);
+}
+
+.kvVal {
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.tagWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill {
+  display: inline-flex;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.06);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.commentBlock {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.commentBox {
+  width: 100%;
+  min-height: 110px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  padding: 10px;
+  resize: vertical;
+  outline: none;
+  font-size: 13px;
+}
+
+.hint {
+  font-size: 11px;
+  color: rgba(0,0,0,0.55);
+}
+
+.modalFooter {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  background: #fff;
+}
+
+.footerHint {
+  font-size: 12px;
+  color: rgba(0,0,0,0.6);
+}
+
+/* arrows */
+.navArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 64px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.9);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.navArrow.left { left: 10px; }
+.navArrow.right { right: 10px; }
+
+.navArrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+@media (max-width: 980px) {
+  .modalBody {
+    grid-template-columns: 1fr;
+  }
+}
