@@ -1,3 +1,5 @@
+/* src/pages/dashboard.css (REPLACE ALL) */
+
 .dashRoot {
   display: flex;
   flex-direction: column;
@@ -15,11 +17,15 @@
   font-size: 18px;
 }
 
+/* ✅ responsive: 2-col on desktop, 1-col on smaller */
 .dashGrid {
   display: grid;
   grid-template-columns: 320px 1fr;
   gap: 14px;
   align-items: start;
+}
+@media (max-width: 1024px) {
+  .dashGrid { grid-template-columns: 1fr; }
 }
 
 .dashLeft,
@@ -29,11 +35,13 @@
   gap: 14px;
 }
 
+/* ✅ theme-safe card */
 .card {
-  background: #fff;
-  border: 1px solid rgba(0,0,0,0.08);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 14px;
+  color: var(--text);
 }
 
 .cardTitle {
@@ -64,14 +72,14 @@
 
 .topKwBarWrap {
   height: 10px;
-  background: rgba(0,0,0,0.08);
+  background: var(--surface-3);
   border-radius: 999px;
   overflow: hidden;
 }
 
 .topKwBar {
   height: 100%;
-  background: rgba(0,0,0,0.55);
+  background: var(--muted);
   border-radius: 999px;
 }
 
@@ -97,13 +105,15 @@
   font-weight: 800;
   padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(0,0,0,0.10);
+  border: 1px solid var(--border);
 }
 
+/* severity colors: keep as-is */
 .sev_CRITICAL { background: rgba(220,0,0,0.10); }
 .sev_HIGH     { background: rgba(255,140,0,0.12); }
 .sev_MED      { background: rgba(255,200,0,0.14); }
 .sev_LOW      { background: rgba(0,160,80,0.12); }
+.sev_INFO     { background: rgba(120,120,120,0.16); }
 
 .sevValue {
   font-weight: 800;
@@ -120,15 +130,17 @@
   flex: 1;
   height: 40px;
   border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid var(--control-border);
   padding: 0 12px;
   outline: none;
+  background: var(--control-bg);
+  color: var(--control-text);
 }
 
 .searchMeta {
   min-width: 110px;
   text-align: right;
-  color: rgba(0,0,0,0.6);
+  color: var(--muted);
   font-size: 13px;
 }
 
@@ -152,21 +164,19 @@
   text-align: left;
   font-size: 12px;
   padding: 12px 14px;
-  background: rgba(0,0,0,0.03);
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
 
 .table tbody td {
   padding: 12px 14px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  border-bottom: 1px solid var(--border);
   vertical-align: top;
   font-size: 13px;
 }
 
-.tdTopic {
-  max-width: 360px;
-}
+.tdTopic { max-width: 360px; }
 
 .tagWrap {
   display: flex;
@@ -179,9 +189,10 @@
   align-items: center;
   padding: 4px 8px;
   border-radius: 999px;
-  background: rgba(0,0,0,0.06);
+  background: var(--surface-3);
   font-size: 12px;
   white-space: nowrap;
+  color: var(--text);
 }
 
 .status {
@@ -190,7 +201,7 @@
   padding: 5px 10px;
   border-radius: 999px;
   display: inline-block;
-  border: 1px solid rgba(0,0,0,0.10);
+  border: 1px solid var(--border);
 }
 
 .status.pending { background: rgba(255, 200, 0, 0.18); }
@@ -199,7 +210,7 @@
 .emptyCell {
   text-align: center;
   padding: 18px !important;
-  color: rgba(0,0,0,0.55);
+  color: var(--muted);
 }
 
 .tableFooter {
@@ -207,8 +218,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 14px;
-  border-top: 1px solid rgba(0,0,0,0.08);
-  background: #fff;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
 }
 
 .footerLeft,
@@ -219,23 +230,26 @@
 }
 
 .muted {
-  color: rgba(0,0,0,0.55);
+  color: var(--muted);
   font-size: 13px;
 }
 
 .select {
   height: 34px;
   border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid var(--control-border);
   padding: 0 10px;
+  background: var(--control-bg);
+  color: var(--control-text);
 }
 
 .pageBtn {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: #fff;
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
+  color: var(--control-text);
   cursor: pointer;
 }
 
@@ -246,89 +260,13 @@
 
 .pageInfo {
   font-variant-numeric: tabular-nums;
-  color: rgba(0,0,0,0.7);
+  color: var(--muted);
 }
+
 .clickRow { cursor: pointer; }
-.clickRow:hover { background: rgba(0,0,0,0.03); }
-.sev_CRITICAL { background: rgba(220,0,0,0.10); }
-.sev_HIGH     { background: rgba(255,140,0,0.12); }
-.sev_MED      { background: rgba(255,200,0,0.14); }
-.sev_LOW      { background: rgba(0,160,80,0.12); }
-.sev_NA       { background: rgba(120,120,120,0.16); }
+.clickRow:hover { background: var(--surface-2); }
 
-.pillNA {
-  background: rgba(120,120,120,0.16);
-}
-
-.filterRow th {
-  padding: 8px 14px;
-  background: rgba(0,0,0,0.02);
-  border-bottom: 1px solid rgba(0,0,0,0.08);
-}
-
-.filterInput,
-.filterSelect {
-  width: 100%;
-  height: 34px;
-  border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.12);
-  padding: 0 10px;
-  background: #fff;
-  outline: none;
-  font-size: 12px;
-}
-.pillNA {
-  background: rgba(120,120,120,0.16);
-}
-
-.filterRow th {
-  padding: 8px 14px;
-  background: rgba(0,0,0,0.02);
-  border-bottom: 1px solid rgba(0,0,0,0.08);
-}
-
-.filterInput,
-.filterSelect {
-  width: 100%;
-  height: 34px;
-  border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.12);
-  padding: 0 10px;
-  background: #fff;
-  outline: none;
-  font-size: 12px;
-}
-
-.filterStack {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-/* Severity standalone card */
-.sev_CRITICAL { background: rgba(220,0,0,0.10); }
-.sev_HIGH     { background: rgba(255,140,0,0.12); }
-.sev_MEDIUM   { background: rgba(255,200,0,0.14); }
-.sev_LOW      { background: rgba(0,160,80,0.12); }
-.sev_INFO     { background: rgba(120,120,120,0.16); }
-
-/* Severity pill in table */
-.sevPill {
-  border-radius: 999px;
-  padding: 6px 10px;
-  font-weight: 600;
-  font-size: 12px;
-  display: inline-block;
-  border: 1px solid rgba(0,0,0,0.08);
-}
-
-.sevPill_CRITICAL { background: rgba(220,0,0,0.10); }
-.sevPill_HIGH     { background: rgba(255,140,0,0.12); }
-.sevPill_MEDIUM   { background: rgba(255,200,0,0.14); }
-.sevPill_LOW      { background: rgba(0,160,80,0.12); }
-.sevPill_INFO     { background: rgba(120,120,120,0.16); }
-
-/* Header filter layout */
+/* header filters */
 .thFilter {
   display: flex;
   align-items: center;
@@ -339,31 +277,183 @@
 .thSelectSolo {
   height: 36px;
   border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid var(--control-border);
   padding: 0 12px;
-  background: #fff;
+  background: var(--control-bg);
+  color: var(--control-text);
   outline: none;
   font-size: 14px;
   font-weight: 600;
+  appearance: auto;
 }
 
-/* make it feel like "ColumnName ▼" */
-.thSelect,
-.thSelectSolo {
-  appearance: auto; /* keep native arrow */
-}
-
-/* input shown only when HAS */
 .thInput {
   height: 36px;
   border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid var(--control-border);
   padding: 0 12px;
-  background: #fff;
+  background: var(--control-bg);
+  color: var(--control-text);
   outline: none;
   font-size: 13px;
   width: 140px;
 }
 
-/* remove old filter row spacing if exists */
-.filterRow { display: none; }
+/* severity pill in table */
+.sevPill {
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-weight: 600;
+  font-size: 12px;
+  display: inline-block;
+  border: 1px solid var(--border);
+}
+
+.sevPill_CRITICAL { background: rgba(220,0,0,0.10); }
+.sevPill_HIGH     { background: rgba(255,140,0,0.12); }
+.sevPill_MEDIUM   { background: rgba(255,200,0,0.14); }
+.sevPill_LOW      { background: rgba(0,160,80,0.12); }
+.sevPill_INFO     { background: rgba(120,120,120,0.16); }
+
+/* ===== Filter Bar (above table) ===== */
+.filterBar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.filterLeft,
+.filterRight{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filterRight{ margin-left: auto; }
+
+.filterGroup{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filterSelect,
+.filterSelectSolo{
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--control-border);
+  padding: 0 12px;
+  background: var(--control-bg);
+  color: var(--control-text);
+  outline: none;
+  font-size: 14px;
+  font-weight: 600;
+  appearance: auto;
+}
+
+.filterInput{
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--control-border);
+  padding: 0 12px;
+  background: var(--control-bg);
+  color: var(--control-text);
+  outline: none;
+  font-size: 13px;
+  width: 180px;
+}
+
+.filterClearBtn{
+  height: 36px;
+}
+
+/* responsive */
+@media (max-width: 900px){
+  .filterBar{
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filterRight{
+    justify-content: flex-end;
+    margin-left: 0;
+  }
+}
+.searchToolbar{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.searchActions{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filterToggle.active{
+  border-color: var(--border-2);
+}
+
+.filterPanel{
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.filterRow{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filterGroup{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filterSelect,
+.filterSelectSolo{
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--control-border);
+  padding: 0 12px;
+  background: var(--control-bg);
+  color: var(--control-text);
+  outline: none;
+  font-size: 14px;
+  font-weight: 600;
+  appearance: auto;
+}
+
+.filterInput{
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--control-border);
+  padding: 0 12px;
+  background: var(--control-bg);
+  color: var(--control-text);
+  outline: none;
+  font-size: 13px;
+  width: 180px;
+}
+
+/* responsive */
+@media (max-width: 900px){
+  .searchToolbar{
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .searchActions{
+    justify-content: space-between;
+    width: 100%;
+  }
+  .filterInput{ width: 100%; }
+}

@@ -1,20 +1,27 @@
+/* src/app/layout.css (REPLACE ALL) */
+
 :root{
-  --sidebar-w: 84px;   /* ✅ ปรับให้เท่ากับ sidebar จริง */
+  --sidebar-w: 84px;
   --topbar-h: 56px;
   --page-pad: 20px;
+
+  /* content max width for ALL pages (standard) */
+  --content-max: 1440px;
 }
 
+/* App root */
 .appRoot{
   min-height: 100vh;
+  background: var(--bg);
 }
 
-/* Main ถูกดันออกจาก sidebar */
+/* Main is pushed by sidebar */
 .appMain{
   margin-left: var(--sidebar-w);
   min-width: 0;
 }
 
-/* Topbar fixed และเริ่มหลัง sidebar เสมอ */
+/* Topbar fixed, always after sidebar */
 .topbarShell{
   position: fixed;
   top: 0;
@@ -23,14 +30,23 @@
   height: var(--topbar-h);
   z-index: 1000;
 
-  background: #fff;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
   box-sizing: border-box;
 }
 
-/* Content เว้น topbar */
+/* Content: padding + topbar spacing + global max width */
 .appContent{
   padding: var(--page-pad);
   padding-top: calc(var(--page-pad) + var(--topbar-h));
   box-sizing: border-box;
+
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+/* responsive padding */
+@media (max-width: 640px){
+  :root{ --page-pad: 14px; }
 }

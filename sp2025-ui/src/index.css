@@ -1,68 +1,175 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+/* src/index.css (REPLACE ALL) */
+
+/* -----------------------------
+   1) Design tokens (semantic)
+   ----------------------------- */
+:root{
+  /* allow native controls to follow system theme */
+  color-scheme: light dark;
+
+  /* typography */
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* ===== LIGHT (default) ===== */
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: rgba(15,23,42,0.03);
+  --surface-3: rgba(15,23,42,0.06);
+
+  --text: #0f172a;
+  --muted: rgba(15,23,42,0.60);
+
+  --border: rgba(15,23,42,0.10);
+  --border-2: rgba(15,23,42,0.14);
+
+  --shadow: 0 20px 60px rgba(0,0,0,0.20);
+
+  /* app accents */
+  --sidebar-bg: #0b1220;
+  --sidebar-text: rgba(255,255,255,0.92);
+  --sidebar-hover: rgba(255,255,255,0.08);
+  --sidebar-active: rgba(255,255,255,0.16);
+
+  --control-bg: #ffffff;
+  --control-border: rgba(15,23,42,0.12);
+  --control-text: #0f172a;
+
+  --btn-solid-bg: rgba(15,23,42,0.92);
+  --btn-solid-text: #ffffff;
+
+  --link: #3b82f6;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+/* ===== DARK (auto from system) ===== */
+@media (prefers-color-scheme: dark) {
+  :root{
+    --bg: #0b1220;
+    --surface: #0f172a;
+    --surface-2: rgba(255,255,255,0.06);
+    --surface-3: rgba(255,255,255,0.10);
+
+    --text: rgba(255,255,255,0.92);
+    --muted: rgba(255,255,255,0.65);
+
+    --border: rgba(255,255,255,0.14);
+    --border-2: rgba(255,255,255,0.20);
+
+    --shadow: 0 20px 60px rgba(0,0,0,0.45);
+
+    --sidebar-bg: #070d18;
+    --sidebar-text: rgba(255,255,255,0.92);
+    --sidebar-hover: rgba(255,255,255,0.10);
+    --sidebar-active: rgba(255,255,255,0.18);
+
+    --control-bg: rgba(255,255,255,0.06);
+    --control-border: rgba(255,255,255,0.18);
+    --control-text: rgba(255,255,255,0.92);
+
+    --btn-solid-bg: rgba(255,255,255,0.92);
+    --btn-solid-text: #0b1220;
+
+    --link: #93c5fd;
+  }
 }
 
-body {
+/* -----------------------------
+   2) Baseline / reset
+   ----------------------------- */
+*{ box-sizing: border-box; }
+
+html, body, #root{ height: 100%; }
+
+body{
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
-  min-height: 100vh;
+
+  /* IMPORTANT: remove template centering */
+  display: block;
+
+  background: var(--bg);
+  color: var(--text);
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+a{
+  color: var(--link);
+  text-decoration: none;
 }
+a:hover{ text-decoration: underline; }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
+/* keep button baseline non-invasive */
+button{
   font-family: inherit;
-  background-color: #1a1a1a;
+}
+/* ===== App controls: buttons + inputs (PUT AT END) ===== */
+
+/* Primary */
+.primaryBtn{
+  border-radius: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  background: var(--btn-solid-bg);
+  color: var(--btn-solid-text);
+  font-weight: 800;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+/* Ghost */
+.ghostBtn{
+  border-radius: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  background: var(--control-bg);
+  color: var(--control-text);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* Danger (ใช้กับ Cancel job) */
+.dangerBtn{
+  border-radius: 12px;
+  padding: 8px 12px;
+  border: 1px solid rgba(220,0,0,0.25);
+  background: rgba(220,0,0,0.92);
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.primaryBtn:disabled,
+.ghostBtn:disabled,
+.dangerBtn:disabled{
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+/* Inputs (ใช้กับ className="input") */
+.input{
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
+  color: var(--control-text);
+  outline: none;
+  box-sizing: border-box;
+  font: inherit;
+}
+
+textarea.input{
+  height: auto;
+  min-height: 110px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.input:focus{
+  border-color: var(--border-2);
 }

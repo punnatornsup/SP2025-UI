@@ -47,21 +47,39 @@ export default function IssueDetailModal({
   return (
     <div className="modalOverlay" onMouseDown={onClose}>
       <div className="modalShell" onMouseDown={(e) => e.stopPropagation()}>
-        {/* Prev / Next */}
-        <button className="navArrow left" onClick={onPrev} disabled={!hasPrev} aria-label="Previous">
-          ‹
-        </button>
-        <button className="navArrow right" onClick={onNext} disabled={!hasNext} aria-label="Next">
-          ›
-        </button>
-
         {/* Header */}
         <div className="modalHeader">
-          <div className="modalTitle">Issue Details</div>
-          <button className="closeBtn" onClick={onClose} aria-label="Close">
+          <div className="modalHeaderLeft">
+            <div className="modalTitle">Issue Details</div>
+
+            <div className="navGroup" aria-label="Navigate records">
+              <button
+                className="navArrow"
+                onClick={onPrev}
+                disabled={!hasPrev}
+                aria-label="Previous"
+                type="button"
+              >
+                ‹
+              </button>
+
+              <button
+                className="navArrow"
+                onClick={onNext}
+                disabled={!hasNext}
+                aria-label="Next"
+                type="button"
+              >
+                ›
+              </button>
+            </div>
+          </div>
+
+          <button className="closeBtn" onClick={onClose} aria-label="Close" type="button">
             ✕
           </button>
         </div>
+
 
         {/* Body */}
         <div className="modalBody">

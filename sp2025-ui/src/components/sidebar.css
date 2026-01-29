@@ -1,13 +1,17 @@
+/* src/components/sidebar.css (REPLACE ALL) */
+
 .sidebar{
   position: fixed;
   top: 0;
   left: 0;
 
-  width: var(--sidebar-w);     /* ✅ ใช้ var เดียวกับ layout */
+  width: var(--sidebar-w);
   height: 100vh;
   z-index: 1100;
 
-  background: #0b1220;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -18,23 +22,41 @@
 }
 
 .sidebarLogo{
-  margin-bottom: 14px;
-  display: flex;
-  justify-content: center;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 14px;
 }
 
 .logoBox{
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(255, 255, 255);
   display: grid;
   place-items: center;
-  font-weight: 800;
-  font-size: 11px;
+  overflow: hidden;
 }
 
+.logoImg{
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+}
+
+.logoText{
+  display: none;
+  line-height: 1.05;
+  color: var(--sidebar-text);
+}
+.logoTextTop{
+  font-weight: 800;
+  font-size: 16px;
+}
+
+/* Nav */
 .sidebarNav{
   display: flex;
   flex-direction: column;
@@ -53,16 +75,16 @@
   justify-content: center;
 
   text-decoration: none;
-  color: rgba(255,255,255,0.88);
+  color: var(--sidebar-text);
   background: transparent;
 }
 
 .navIconBtn:hover{
-  background: rgba(255,255,255,0.08);
+  background: var(--sidebar-hover);
 }
 
 .navIconBtn.active{
-  background: rgba(255,255,255,0.16);
+  background: var(--sidebar-active);
   color: #fff;
 }
 
@@ -71,7 +93,6 @@
   place-items: center;
 }
 
-/* ✅ ซ่อน label ตอน collapsed */
 .navLabel{
   display: none;
   margin-left: 10px;
@@ -80,7 +101,7 @@
   font-weight: 600;
 }
 
-/* ✅ ตอน expanded: ปุ่มยาวขึ้น + จัดชิดซ้าย + โชว์ label */
+/* Expanded mode */
 .sidebar.sidebar--expanded{
   align-items: stretch;
   padding: 12px 10px;
@@ -99,46 +120,7 @@
 .sidebar.sidebar--expanded .navLabel{
   display: inline;
 }
-.sidebarLogo{
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
 
-/* กล่องโลโก้ */
-.logoBox{
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  background: rgb(253, 253, 253);
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-}
-
-/* รูปโลโก้ */
-.logoImg{
-  width: 78%;
-  height: 78%;
-  object-fit: contain;
-}
-
-/* ชื่อข้างโลโก้: ซ่อนตอน collapsed */
-.logoText{
-  display: none;
-  line-height: 1.05;
-  color: rgba(255,255,255,0.92);
-}
-
-.logoTextTop{
-  font-weight: 800;
-  font-size: 16px;
-}
-
-/* ✅ แสดงชื่อเฉพาะตอน expanded */
 .sidebar.sidebar--expanded .sidebarLogo{
   justify-content: flex-start;
   padding: 0 8px;

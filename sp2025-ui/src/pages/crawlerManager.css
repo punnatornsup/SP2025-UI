@@ -1,27 +1,165 @@
-/* เพิ่มท้ายไฟล์ crawlerManager.css */
+/* src/pages/crawlerManager.css (REPLACE ALL) */
 
-/* cookie rows */
-.cookieList { display: flex; flex-direction: column; gap: 10px; }
-.cookieRow { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: center; }
-.ddosNote { margin-top: 6px; font-size: 12px; color: rgba(0,0,0,0.55); }
+.cmRoot{ display:flex; flex-direction:column; gap:14px; }
+.cmTitle{ margin:0; font-size:18px; font-weight:900; }
 
-/* schedule layout */
-.label.small { font-size: 11px; font-weight: 900; color: rgba(0,0,0,0.55); }
-
-.schedule2col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+.cmRoot .card{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  color: var(--text);
 }
 
-.cronGrid {
-  display: grid;
+.cmRoot .cardHeaderRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+  flex-wrap: wrap;
+}
+.cmRoot .cardTitle{ font-weight:900; }
+
+@media (max-width:520px){
+  .cmRoot .cardHeaderRow{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+}
+
+/* tables */
+.cmRoot .tableWrap{ width:100%; overflow:auto; }
+.cmRoot .table{ width:100%; border-collapse:collapse; min-width:980px; }
+.cmRoot .table thead th{
+  text-align:left;
+  font-size:12px;
+  padding:12px 14px;
+  background: var(--surface-2);
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+.cmRoot .table tbody td{
+  padding:12px 14px;
+  border-bottom:1px solid var(--border);
+  font-size:13px;
+  vertical-align:top;
+}
+.cmRoot .tdAction{ width:1%; white-space:nowrap; }
+
+/* modal (scoped) */
+.cmRoot .modalOverlay{
+  position:fixed;
+  inset:0;
+  background: rgba(0,0,0,0.45);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  z-index:999;
+}
+
+.cmRoot .modalShell{
+  width: min(1100px, 100%);
+  height: min(720px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+.cmRoot .modalHeader{
+  height:56px;
+  padding:0 14px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.cmRoot .modalTitle{ font-weight:900; }
+
+.cmRoot .closeBtn{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid var(--control-border);
+  background: var(--control-bg);
+  color: var(--control-text);
+  cursor:pointer;
+}
+
+.cmRoot .modalBody{
+  flex:1;
+  padding:14px;
+  min-height:0;
+}
+
+.cmRoot .modalFooter{
+  padding:12px 14px;
+  border-top:1px solid var(--border);
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+
+/* form layout */
+.cmRoot .formGrid{ display:flex; flex-direction:column; gap:12px; }
+
+.cmRoot .field{ display:flex; flex-direction:column; gap:6px; }
+.cmRoot .label{
+  font-size:12px;
+  font-weight:900;
+  color: var(--muted);
+}
+
+.cmRoot .fieldRow{
+  display:grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap:10px;
+  align-items:center;
+}
+
+/* cookie rows (ของเดิม) */
+.cmRoot .cookieList{ display:flex; flex-direction:column; gap:10px; }
+
+.cmRoot .cookieRow{
+  display:grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap:10px;
+  align-items:center;
+}
+
+.cmRoot .ddosNote{
+  margin-top:6px;
+  font-size:12px;
+  color: var(--muted);
+}
+
+/* schedule layout (ของเดิม) */
+.cmRoot .label.small{
+  font-size:11px;
+  font-weight:900;
+  color: var(--muted);
+}
+
+.cmRoot .schedule2col{
+  display:grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap:12px;
+}
+
+.cmRoot .cronGrid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
 }
 
 @media (max-width: 900px) {
-  .cookieRow { grid-template-columns: 1fr; }
-  .schedule2col { grid-template-columns: 1fr; }
-  .cronGrid { grid-template-columns: 1fr; }
+  .cmRoot .cookieRow { grid-template-columns: 1fr; }
+  .cmRoot .fieldRow { grid-template-columns: 1fr; }
+  .cmRoot .schedule2col { grid-template-columns: 1fr; }
+  .cmRoot .cronGrid { grid-template-columns: 1fr; }
 }
