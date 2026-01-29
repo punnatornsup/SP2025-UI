@@ -1,0 +1,324 @@
+.rmRoot { display: flex; flex-direction: column; gap: 14px; }
+.rmHeader { display: flex; align-items: center; justify-content: space-between; }
+.rmTitle { margin: 0; font-size: 18px; }
+
+.card { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 14px; padding: 14px; }
+.rmCard { min-width: 0; }
+
+.cardHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.cardTitle { font-weight: 900; }
+.muted { color: rgba(0,0,0,0.55); font-size: 13px; }
+.bold { font-weight: 900; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; }
+
+.tableWrap { width: 100%; overflow: auto; }
+.table { width: 100%; border-collapse: collapse; min-width: 980px; }
+.table thead th {
+  text-align: left;
+  font-size: 12px;
+  padding: 12px 14px;
+  background: rgba(0,0,0,0.03);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  white-space: nowrap;
+}
+.table tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  vertical-align: top;
+  font-size: 13px;
+}
+
+.tdAction { width: 1%; white-space: nowrap; }
+.emptyCell { text-align: center; padding: 18px !important; color: rgba(0,0,0,0.55); }
+
+.infoBox {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+.errorBox {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(220,0,0,0.08);
+  border: 1px solid rgba(220,0,0,0.14);
+}
+
+.primaryBtn {
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(0,0,0,0.9);
+  color: #fff;
+  border-radius: 12px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 800;
+}
+.ghostBtn {
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+  border-radius: 12px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+/* pills */
+.pill {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  border: 1px solid rgba(0,0,0,0.10);
+  background: rgba(0,0,0,0.05);
+}
+.pill.ok { background: rgba(0,160,80,0.18); }
+.pill.muted { background: rgba(0,0,0,0.06); }
+.pill.sev_LOW { background: rgba(0,0,0,0.06); }
+.pill.sev_MED { background: rgba(255,200,0,0.18); }
+.pill.sev_HIGH { background: rgba(255,120,0,0.18); }
+.pill.sev_CRITICAL { background: rgba(220,0,0,0.14); }
+
+/* gamma box */
+.gammaBox { display: flex; flex-direction: column; gap: 10px; }
+.gammaRow { display: flex; align-items: center; gap: 12px; }
+.gammaLabel { font-weight: 900; width: 70px; }
+.gammaSlider { width: min(520px, 100%); }
+.gammaScale { display: flex; justify-content: space-between; width: min(520px, 100%); }
+.hint { font-size: 12px; color: rgba(0,0,0,0.55); }
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 999;
+}
+.modalShell {
+  width: min(760px, 100%);
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(0,0,0,0.14);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  overflow: hidden;
+}
+.modalHeader {
+  height: 56px;
+  padding: 0 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modalTitle { font-weight: 900; }
+.closeBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+  cursor: pointer;
+}
+.modalBody { padding: 14px; }
+.modalFooter {
+  padding: 12px 14px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.formGrid { display: flex; flex-direction: column; gap: 12px; }
+.field .label { font-size: 12px; font-weight: 900; color: rgba(0,0,0,0.65); margin-bottom: 6px; }
+.input {
+  width: 100%;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  padding: 0 12px;
+  outline: none;
+  box-sizing: border-box;
+}
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+@media (max-width: 900px) {
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+}
+/* src/features/ruleManager/ruleManager.css */
+
+/* (ถ้ามีของเดิมอยู่แล้ว ให้ merge เฉพาะส่วนที่ไม่มี) */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.pill.ok { background: rgba(0, 200, 120, 0.12); }
+.pill.muted { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.6); }
+
+.pill.sev_LOW { background: rgba(0,0,0,0.06); }
+.pill.sev_MED { background: rgba(255, 180, 0, 0.14); }
+.pill.sev_HIGH { background: rgba(255, 80, 0, 0.14); }
+.pill.sev_CRITICAL { background: rgba(255, 0, 0, 0.14); }
+
+.gammaBox { padding: 16px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.08); }
+.gammaRow { display:flex; align-items:center; gap: 12px; }
+.gammaLabel { font-weight: 900; }
+.gammaSlider { width: 100%; }
+.gammaScale { display:flex; justify-content: space-between; margin-top: 8px; opacity: 0.7; }
+
+/* ===== RuleManager: rubric UX additions ===== */
+
+.rmTableWide { min-width: 1180px; }
+
+.textarea {
+  width: 100%;
+  min-height: 96px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  padding: 10px 12px;
+  outline: none;
+  box-sizing: border-box;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.modalWide { width: min(1100px, 100%); }
+
+.rmModalGrid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .rmModalGrid { grid-template-columns: 1fr; }
+}
+
+.rubricCards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .rubricCards { grid-template-columns: 1fr; }
+}
+
+.cbGrid {
+  grid-template-columns: 1fr;
+}
+
+.rubricCard {
+  text-align: left;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: transform 0.05s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+.rubricCard:hover { transform: translateY(-1px); }
+
+.rubricCard.active {
+  border-color: rgba(0,0,0,0.45);
+  background: rgba(0,0,0,0.03);
+}
+
+.rubricTitle { font-weight: 900; font-size: 13px; margin-bottom: 6px; }
+.rubricSub { font-size: 12px; color: rgba(0,0,0,0.6); line-height: 1.35; }
+
+.rubricList {
+  margin: 0;
+  padding-left: 16px;
+  color: rgba(0,0,0,0.65);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.rubricRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .rubricRow { grid-template-columns: 1fr 1fr; }
+}
+
+.chipBtn {
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+  padding: 10px 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.chipBtn.active {
+  border-color: rgba(0,0,0,0.45);
+  background: rgba(0,0,0,0.03);
+}
+
+.chipTop { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.chipDesc { font-size: 12px; color: rgba(0,0,0,0.6); line-height: 1.25; }
+
+.previewCard {
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(0,0,0,0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.previewTitle { font-weight: 900; }
+.previewFormula { font-size: 12px; color: rgba(0,0,0,0.65); }
+
+.previewScoreRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.previewScore { font-size: 28px; font-weight: 900; }
+
+.previewExplain {
+  border-top: 1px solid rgba(0,0,0,0.08);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.exRow { display: flex; align-items: center; justify-content: space-between; }
+.exKey { font-weight: 900; color: rgba(0,0,0,0.65); }
+.exVal { font-weight: 900; }
+
+.previewHint {
+  font-size: 12px;
+  color: rgba(0,0,0,0.6);
+}
+
+.previewBullets {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12px;
+  color: rgba(0,0,0,0.65);
+  line-height: 1.35;
+}

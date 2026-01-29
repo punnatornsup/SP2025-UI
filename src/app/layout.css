@@ -1,0 +1,42 @@
+:root{
+  --sidebar-w: 84px;   /* ✅ ปรับให้เท่ากับ sidebar จริง */
+  --topbar-h: 56px;
+  --page-pad: 20px;
+}
+:root {
+  color-scheme: light;
+}
+body {
+  background: #fff;
+  color: #111;
+}
+.appRoot{
+  min-height: 100vh;
+}
+
+/* Main ถูกดันออกจาก sidebar */
+.appMain{
+  margin-left: var(--sidebar-w);
+  min-width: 0;
+}
+
+/* Topbar fixed และเริ่มหลัง sidebar เสมอ */
+.topbarShell{
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-w);
+  right: 0;
+  height: var(--topbar-h);
+  z-index: 1000;
+
+  background: #fff;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  box-sizing: border-box;
+}
+
+/* Content เว้น topbar */
+.appContent{
+  padding: var(--page-pad);
+  padding-top: calc(var(--page-pad) + var(--topbar-h));
+  box-sizing: border-box;
+}
