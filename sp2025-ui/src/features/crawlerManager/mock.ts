@@ -1,40 +1,68 @@
+// src/features/crawlerManager/mock.ts
 import type { CrawlerProfileDTO, ScheduleJobDTO, JobHistoryDTO, WorkerStatusDTO } from "./types";
 
 export const mockCrawlerProfiles: CrawlerProfileDTO[] = [
   {
     id: "d9a2c0c1-52d7-4b7a-9c2b-1bd0b6bfe111",
     name: "LeakBase Crawler",
+    description: "Crawl thread pages and extract posts",
     allow_domains: ["leakbase.to", "leakbase.cc"],
-    alert_to: "TB-CERT Slack #alerts",
+    start_url: "https://leakbase.to/forums",
+    alert_to: "cert@org.com",
     bypass_ddos: true,
-    session_cookie: true,
+    cookies: [{ name: "session", value: "abc123" }],
   },
   {
     id: "b2e3c1a7-3c7b-4b51-a6c2-11a5b7f0a222",
     name: "BreachForums Crawler",
+    description: "Monitor selected sections",
     allow_domains: ["breachforums.is"],
-    alert_to: "email: cert@org.com",
+    start_url: "https://breachforums.is",
+    alert_to: "cert@org.com",
     bypass_ddos: false,
-    session_cookie: true,
+    cookies: [],
   },
 ];
 
 export const mockScheduleJobs: ScheduleJobDTO[] = [
+  // INTERVAL
   {
     id: "sch-001",
-    name: "Daily crawl leakbase",
+    name: "crawl_every_2_mins",
+    enabled: true,
     crawler_id: mockCrawlerProfiles[0].id,
+    schedule_mode: "INTERVAL",
+    interval: { every: 2, period: "minutes" },
     total_run: 128,
     last_run: "2026-01-28T09:20:00Z",
-    schedule_type: "CRON",
   },
+  // CRONTAB
   {
     id: "sch-002",
-    name: "Every 6 hours breachforums",
+    name: "daily_09_30_bkk",
+    enabled: true,
     crawler_id: mockCrawlerProfiles[1].id,
+    schedule_mode: "CRONTAB",
+    crontab: {
+      minute: "30",
+      hour: "9",
+      day_of_week: "*",
+      day_of_month: "*",
+      month_of_year: "*",
+    },
     total_run: 56,
-    last_run: "2026-01-28T08:00:00Z",
-    schedule_type: "INTERVAL",
+    last_run: "2026-01-28T02:30:00Z",
+  },
+  // CLOCKED
+  {
+    id: "sch-003",
+    name: "run_once_release_day",
+    enabled: true,
+    crawler_id: mockCrawlerProfiles[0].id,
+    schedule_mode: "CLOCKED",
+    clocked: { clocked_time: "2025-12-15T09:30:00+07:00" },
+    total_run: 0,
+    last_run: "-",
   },
 ];
 
@@ -58,62 +86,12 @@ export const mockJobHistory: JobHistoryDTO[] = Array.from({ length: 24 }).map((_
 
 export const mockWorkersStatus: WorkerStatusDTO[] = [
   {
-    worker: "worker_crawl_detail_of_post_page@MUICTxTBCERT_0faf2d847053",
-    status: "Online",
-    active: 0,
-    processed: 442,
-    failed: 0,
-    succeeded: 442,
-    retried: 0,
-    load_average: [0.92, 0.67, 0.4],
-  },
-  {
     worker: "worker_scheduler@backend_node",
     status: "Online",
     active: 0,
     processed: 16,
     failed: 0,
     succeeded: 16,
-    retried: 0,
-    load_average: [0.86, 0.66, 0.4],
-  },
-  {
-    worker: "model_valid_url_identifier@MUICTxTBCERT_ce97b06353e2",
-    status: "Online",
-    active: 0,
-    processed: 0,
-    failed: 0,
-    succeeded: 0,
-    retried: 0,
-    load_average: [0.86, 0.66, 0.4],
-  },
-  {
-    worker: "model_final_score_calculator@MUICTxTBCERT_ce97b06353e2",
-    status: "Online",
-    active: 0,
-    processed: 276,
-    failed: 4,
-    succeeded: 272,
-    retried: 0,
-    load_average: [0.84, 0.66, 0.4],
-  },
-  {
-    worker: "worker_start_crawl_list_of_categories@MUICTxTBCERT_0faf2d847053",
-    status: "Online",
-    active: 0,
-    processed: 0,
-    failed: 0,
-    succeeded: 0,
-    retried: 0,
-    load_average: [0.86, 0.66, 0.4],
-  },
-  {
-    worker: "worker_crawl_detail_of_post_page_ddos_bypass@MUICTxTBCERT_0faf2d847053",
-    status: "Online",
-    active: 0,
-    processed: 0,
-    failed: 0,
-    succeeded: 0,
     retried: 0,
     load_average: [0.86, 0.66, 0.4],
   },

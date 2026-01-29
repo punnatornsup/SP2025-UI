@@ -1,39 +1,34 @@
+// src/features/ruleManager/mock.ts
 import type { ActiveKeywordRuleDTO, SensitivityDTO } from "./types";
 
 export const mockActiveKeywordRules: ActiveKeywordRuleDTO[] = [
   {
-    id: "rule-001",
-    title: "Thailand PII keyword pack",
-    created_at: "2026-01-20T10:10:00Z",
+    id: "rule-9a12-1700000000000",
+    title: "paetongtarn shinawatra",
+    description: "Matches the Prime Minister's name in leaked documents",
+    created_at: "2026-01-20T10:00:00.000Z",
     status: "ACTIVE",
-    doc_score: 0.78,
-    ci_score: 0.62,
-    cb_score: 0.55,
+    dpc: 1,
+    ei: 0.75,
+    cb: 3,
+    final_severity: (1 * 0.75) + 3,
     severity_level: "HIGH",
   },
   {
-    id: "rule-002",
-    title: "Banking credential patterns",
-    created_at: "2026-01-18T06:40:00Z",
+    id: "rule-bb10-1700000000001",
+    title: "credit card cvv",
+    description: "Actionable payment credential details (fraud enabling).",
+    created_at: "2026-01-22T03:12:00.000Z",
     status: "ACTIVE",
-    doc_score: 0.86,
-    ci_score: 0.80,
-    cb_score: 0.72,
+    dpc: 4,
+    ei: 1.0,
+    cb: 1,
+    final_severity: (4 * 1.0) + 1,
     severity_level: "CRITICAL",
-  },
-  {
-    id: "rule-003",
-    title: "Low-risk chatter",
-    created_at: "2026-01-12T12:00:00Z",
-    status: "INACTIVE",
-    doc_score: 0.30,
-    ci_score: 0.25,
-    cb_score: 0.18,
-    severity_level: "LOW",
   },
 ];
 
 export const mockSensitivity: SensitivityDTO = {
-  gamma: 0.35,
-  updated_at: "2026-01-28T09:00:00Z",
+  gamma: 0.5,
+  updated_at: "2026-01-28T02:30:00.000Z",
 };

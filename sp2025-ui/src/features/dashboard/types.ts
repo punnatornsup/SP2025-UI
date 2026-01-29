@@ -1,4 +1,4 @@
-export type SeverityLevel = "CRITICAL" | "HIGH" | "MED" | "LOW";
+export type SeverityLevel = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "INFO";
 
 export type DashboardSummaryDTO = {
   severity_counts: Record<SeverityLevel, number>;
@@ -8,15 +8,19 @@ export type DashboardSummaryDTO = {
 export type DashboardAlertRowDTO = {
   id: string;
   topic_name: string;
+
+  // Keyword can be N/A => allow empty string
   keyword: string;
+
   ai_tags: string[];
   alert_type: string;
   post_at: string;
   date: string;
   status: string;
 
-  // ===== Optional detail fields (รองรับ backend ในอนาคต) =====
   severity?: SeverityLevel;
+
+  // optional detail
   final_score?: number;
   fetched_at?: string;
   full_url?: string;

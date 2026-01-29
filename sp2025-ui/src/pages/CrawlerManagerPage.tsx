@@ -1,10 +1,26 @@
 import { useMemo, useState } from "react";
 import "./crawlerManager.css";
 
-import { useCrawlerProfiles, useJobHistory, useScheduleJobs, useWorkersStatus } from "@/features/crawlerManager/hooks";
-import type { CrawlerProfileDTO, ScheduleJobDTO, JobHistoryDTO } from "@/features/crawlerManager/types";
+import {
+  useCrawlerProfiles,
+  useJobHistory,
+  useScheduleJobs,
+  useWorkersStatus,
+} from "@/features/crawlerManager/hooks";
+import type {
+  CrawlerProfileDTO,
+  ScheduleJobDTO,
+  JobHistoryDTO,
+  CookieKV,
+} from "@/features/crawlerManager/types";
 
-type ModalMode = "NONE" | "ADD_CRAWLER" | "EDIT_CRAWLER" | "ADD_SCHEDULE" | "EDIT_SCHEDULE" | "CANCEL_JOB";
+type ModalMode =
+  | "NONE"
+  | "ADD_CRAWLER"
+  | "EDIT_CRAWLER"
+  | "ADD_SCHEDULE"
+  | "EDIT_SCHEDULE"
+  | "CANCEL_JOB";
 
 function genUUIDLike() {
   return crypto.randomUUID?.() ?? `id-${Math.random().toString(16).slice(2)}-${Date.now()}`;
@@ -27,30 +43,45 @@ export default function CrawlerManagerPage() {
   const [activeSchedule, setActiveSchedule] = useState<ScheduleJobDTO | null>(null);
   const [activeJob, setActiveJob] = useState<JobHistoryDTO | null>(null);
 
-  // ===== form states =====
+  // ===== form states (Crawler) =====
   const [pName, setPName] = useState("");
+  const [pDesc, setPDesc] = useState("");
   const [pDomains, setPDomains] = useState("");
+  const [pStartUrl, setPStartUrl] = useState("");
   const [pAlertTo, setPAlertTo] = useState("");
   const [pBypass, setPBypass] = useState(false);
-  const [pCookie, setPCookie] = useState(false);
+  const [pCookies, setPCookies] = useState<CookieKV[]>([{ name: "", value: "" }]);
 
+  // ===== form states (Schedule) =====
   const [sName, setSName] = useState("");
+  const [sEnabled, setSEnabled] = useState(true);
   const [sCrawlerId, setSCrawlerId] = useState("");
-  const [sType, setSType] = useState("CRON");
+  const [sMode, setSMode] = useState<"INTERVAL" | "CRONTAB" | "CLOCKED">("INTERVAL");
+
+  // Interval
+  const [sEvery, setSEvery] = useState(2);
+  const [sPeriod, setSPeriod] = useState<"seconds" | "minutes" | "hours" | "days">("minutes");
+
+  // Crontab
+  const [cMinute, setCMinute] = useState("30");
+  const [cHour, setCHour] = useState("*");
+  const [cDow, setCDow] = useState("*");
+  const [cDom, setCDom] = useState("*");
+  const [cMoy, setCMoy] = useState("*");
+
+  // Clocked (datetime-local)
+  const [clockLocal, setClockLocal] = useState(""); // "YYYY-MM-DDTHH:mm"
 
   const infoError = profiles.error || schedules.error || jobs.error || workers.error;
   const infoLoading = profiles.loading || schedules.loading || jobs.loading || workers.loading;
 
-  const crawlerIdOptions = useMemo(() => profileRows.map((p) => ({ id: p.id, name: p.name })), [profileRows]);
+  const crawlerIdOptions = useMemo(
+    () => profileRows.map((p) => ({ id: p.id, name: p.name })),
+    [profileRows]
+  );
 
   const workerTotals = useMemo(() => {
-    const sum = {
-      active: 0,
-      processed: 0,
-      failed: 0,
-      succeeded: 0,
-      retried: 0,
-    };
+    const sum = { active: 0, processed: 0, failed: 0, succeeded: 0, retried: 0 };
     for (const w of workerRows) {
       sum.active += w.active;
       sum.processed += w.processed;
@@ -61,42 +92,73 @@ export default function CrawlerManagerPage() {
     return sum;
   }, [workerRows]);
 
+  // ===== helpers =====
+  function normalizeDomains(raw: string) {
+    return raw
+      .split(",")
+      .map((x) => x.trim())
+      .filter(Boolean);
+  }
+
+  function normalizeCookies(rows: CookieKV[]) {
+    return (rows ?? [])
+      .map((r) => ({ name: r.name?.trim() ?? "", value: r.value?.trim() ?? "" }))
+      .filter((r) => r.name.length > 0 && r.value.length > 0);
+  }
+
+  function toBangkokISO(local: string) {
+    // "YYYY-MM-DDTHH:mm" -> "YYYY-MM-DDTHH:mm:00+07:00"
+    if (!local) return "";
+    return `${local}:00+07:00`;
+  }
+
+  function fromBangkokISO(iso: string) {
+    // "2025-12-15T09:30:00+07:00" -> "2025-12-15T09:30"
+    if (!iso) return "";
+    return iso.slice(0, 16);
+  }
+
+  // ===== crawler modal actions =====
   function openAddCrawler() {
     setActiveProfile(null);
     setPName("");
+    setPDesc("");
     setPDomains("");
+    setPStartUrl("");
     setPAlertTo("");
     setPBypass(false);
-    setPCookie(false);
+    setPCookies([{ name: "", value: "" }]);
     setModal("ADD_CRAWLER");
   }
 
   function openEditCrawler(row: CrawlerProfileDTO) {
     setActiveProfile(row);
     setPName(row.name);
+    setPDesc(row.description);
     setPDomains(row.allow_domains.join(", "));
+    setPStartUrl(row.start_url);
     setPAlertTo(row.alert_to);
     setPBypass(row.bypass_ddos);
-    setPCookie(row.session_cookie);
+    setPCookies(row.cookies?.length ? row.cookies : [{ name: "", value: "" }]);
     setModal("EDIT_CRAWLER");
   }
 
   function saveCrawler() {
-    const domains = pDomains
-      .split(",")
-      .map((x) => x.trim())
-      .filter(Boolean);
+    const domains = normalizeDomains(pDomains);
+    const cookies = normalizeCookies(pCookies);
 
     if (modal === "ADD_CRAWLER") {
       const newRow: CrawlerProfileDTO = {
         id: genUUIDLike(),
         name: pName || "Untitled crawler",
+        description: pDesc || "-",
         allow_domains: domains,
+        start_url: pStartUrl || "-",
         alert_to: pAlertTo || "-",
         bypass_ddos: pBypass,
-        session_cookie: pCookie,
+        cookies,
       };
-      profiles.setData((prev) => ([...(prev ?? []), newRow]));
+      profiles.setData((prev) => [...(prev ?? []), newRow]);
     }
 
     if (modal === "EDIT_CRAWLER" && activeProfile) {
@@ -106,10 +168,12 @@ export default function CrawlerManagerPage() {
             ? {
                 ...r,
                 name: pName || r.name,
+                description: pDesc || r.description,
                 allow_domains: domains,
+                start_url: pStartUrl || r.start_url,
                 alert_to: pAlertTo || r.alert_to,
                 bypass_ddos: pBypass,
-                session_cookie: pCookie,
+                cookies,
               }
             : r
         )
@@ -119,48 +183,120 @@ export default function CrawlerManagerPage() {
     setModal("NONE");
   }
 
+  function addCookieRow() {
+    setPCookies((prev) => [...prev, { name: "", value: "" }]);
+  }
+
+  function removeCookieRow(idx: number) {
+    setPCookies((prev) => {
+      const next = prev.filter((_, i) => i !== idx);
+      return next.length ? next : [{ name: "", value: "" }];
+    });
+  }
+
+  function updateCookieRow(idx: number, patch: Partial<CookieKV>) {
+    setPCookies((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
+  }
+
+  // ===== schedule modal actions =====
   function openAddSchedule() {
     setActiveSchedule(null);
     setSName("");
+    setSEnabled(true);
     setSCrawlerId(crawlerIdOptions[0]?.id ?? "");
-    setSType("CRON");
+    setSMode("INTERVAL");
+
+    setSEvery(2);
+    setSPeriod("minutes");
+
+    setCMinute("30");
+    setCHour("*");
+    setCDow("*");
+    setCDom("*");
+    setCMoy("*");
+
+    setClockLocal("");
     setModal("ADD_SCHEDULE");
   }
 
   function openEditSchedule(row: ScheduleJobDTO) {
     setActiveSchedule(row);
     setSName(row.name);
+    setSEnabled(row.enabled);
     setSCrawlerId(row.crawler_id);
-    setSType(row.schedule_type);
+    setSMode(row.schedule_mode);
+
+    // Interval
+    setSEvery(row.interval?.every ?? 2);
+    setSPeriod(row.interval?.period ?? "minutes");
+
+    // Crontab
+    setCMinute(row.crontab?.minute ?? "30");
+    setCHour(row.crontab?.hour ?? "*");
+    setCDow(row.crontab?.day_of_week ?? "*");
+    setCDom(row.crontab?.day_of_month ?? "*");
+    setCMoy(row.crontab?.month_of_year ?? "*");
+
+    // Clocked
+    setClockLocal(fromBangkokISO(row.clocked?.clocked_time ?? ""));
+
     setModal("EDIT_SCHEDULE");
   }
 
   function saveSchedule() {
+    const base = {
+      name: sName || "Untitled schedule",
+      crawler_id: sCrawlerId,
+      enabled: sEnabled,
+      schedule_mode: sMode as ScheduleJobDTO["schedule_mode"],
+    };
+
+    const modePayload =
+      sMode === "INTERVAL"
+        ? {
+            interval: { every: Math.max(1, Math.floor(sEvery)), period: sPeriod },
+            crontab: undefined,
+            clocked: undefined,
+          }
+        : sMode === "CRONTAB"
+        ? {
+            crontab: {
+              minute: cMinute || "*",
+              hour: cHour || "*",
+              day_of_week: cDow || "*",
+              day_of_month: cDom || "*",
+              month_of_year: cMoy || "*",
+            },
+            interval: undefined,
+            clocked: undefined,
+          }
+        : {
+            clocked: { clocked_time: toBangkokISO(clockLocal) || "2025-12-15T09:30:00+07:00" },
+            interval: undefined,
+            crontab: undefined,
+          };
+
     if (modal === "ADD_SCHEDULE") {
       const newRow: ScheduleJobDTO = {
         id: `sch-${Math.random().toString(16).slice(2, 6)}`,
-        name: sName || "Untitled schedule",
-        crawler_id: sCrawlerId,
+        ...base,
+        ...modePayload,
         total_run: 0,
         last_run: "-",
-        schedule_type: sType,
       };
-      schedules.setData((prev) => ([...(prev ?? []), newRow]));
+      schedules.setData((prev) => [...(prev ?? []), newRow]);
     }
 
     if (modal === "EDIT_SCHEDULE" && activeSchedule) {
       schedules.setData((prev) =>
-        (prev ?? []).map((r) =>
-          r.id === activeSchedule.id
-            ? { ...r, name: sName || r.name, crawler_id: sCrawlerId, schedule_type: sType }
-            : r
-        )
+        (prev ?? []).map((r) => (r.id === activeSchedule.id ? { ...r, ...base, ...modePayload } : r))
       );
     }
 
     setModal("NONE");
   }
 
+  // ===== job actions =====
   function openCancelJob(row: JobHistoryDTO) {
     setActiveJob(row);
     setModal("CANCEL_JOB");
@@ -168,7 +304,6 @@ export default function CrawlerManagerPage() {
 
   function confirmCancelJob() {
     if (!activeJob) return;
-
     jobs.setData((prev) =>
       (prev ?? []).map((r) => (r.job_id === activeJob.job_id ? { ...r, status: "CANCELED" } : r))
     );
@@ -200,10 +335,12 @@ export default function CrawlerManagerPage() {
                 <tr>
                   <th>ID (UUID)</th>
                   <th>Name</th>
+                  <th>Description</th>
                   <th>Allow domain</th>
-                  <th>Alert to</th>
+                  <th>Start url</th>
+                  <th>To alert email</th>
+                  <th>Cookies</th>
                   <th>Bypass ddos</th>
-                  <th>Session cookie</th>
                   <th></th>
                 </tr>
               </thead>
@@ -212,10 +349,12 @@ export default function CrawlerManagerPage() {
                   <tr key={r.id}>
                     <td className="mono">{r.id}</td>
                     <td className="bold">{r.name}</td>
+                    <td>{r.description}</td>
                     <td>{r.allow_domains.join(", ")}</td>
-                    <td>{r.alert_to}</td>
+                    <td className="mono">{r.start_url}</td>
+                    <td className="mono">{r.alert_to}</td>
+                    <td className="mono">{r.cookies?.length ?? 0}</td>
                     <td>{r.bypass_ddos ? "T" : "F"}</td>
-                    <td>{r.session_cookie ? "T" : "F"}</td>
                     <td className="tdAction">
                       <button className="ghostBtn" onClick={() => openEditCrawler(r)}>
                         Edit
@@ -226,7 +365,9 @@ export default function CrawlerManagerPage() {
 
                 {!profiles.loading && profileRows.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="emptyCell">No data</td>
+                    <td colSpan={9} className="emptyCell">
+                      No data
+                    </td>
                   </tr>
                 )}
               </tbody>
@@ -248,32 +389,41 @@ export default function CrawlerManagerPage() {
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Crawler id</th>
+                  <th>Enabled</th>
+                  <th>Mode</th>
+                  <th>Crawler</th>
                   <th>Total run</th>
                   <th>Last run</th>
-                  <th>Schedule type</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
-                {scheduleRows.map((r) => (
-                  <tr key={r.id}>
-                    <td className="bold">{r.name}</td>
-                    <td className="mono">{r.crawler_id}</td>
-                    <td className="mono">{r.total_run}</td>
-                    <td className="mono">{r.last_run}</td>
-                    <td>{r.schedule_type}</td>
-                    <td className="tdAction">
-                      <button className="ghostBtn" onClick={() => openEditSchedule(r)}>
-                        Edit
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {scheduleRows.map((r) => {
+                  const crawlerName = crawlerIdOptions.find((x) => x.id === r.crawler_id)?.name ?? "-";
+                  return (
+                    <tr key={r.id}>
+                      <td className="bold">{r.name}</td>
+                      <td>{r.enabled ? "T" : "F"}</td>
+                      <td className="mono">{r.schedule_mode}</td>
+                      <td className="mono">
+                        {crawlerName} — {r.crawler_id}
+                      </td>
+                      <td className="mono">{r.total_run}</td>
+                      <td className="mono">{r.last_run}</td>
+                      <td className="tdAction">
+                        <button className="ghostBtn" onClick={() => openEditSchedule(r)}>
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
 
                 {!schedules.loading && scheduleRows.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="emptyCell">No data</td>
+                    <td colSpan={7} className="emptyCell">
+                      No data
+                    </td>
                   </tr>
                 )}
               </tbody>
@@ -341,7 +491,9 @@ export default function CrawlerManagerPage() {
 
               {!jobs.loading && jobRows.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="emptyCell">No data</td>
+                  <td colSpan={7} className="emptyCell">
+                    No data
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -389,7 +541,6 @@ export default function CrawlerManagerPage() {
                 </tr>
               ))}
 
-              {/* total row */}
               {workerRows.length > 0 && (
                 <tr className="totalRow">
                   <td className="bold">Total</td>
@@ -405,7 +556,9 @@ export default function CrawlerManagerPage() {
 
               {!workers.loading && workerRows.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="emptyCell">No data</td>
+                  <td colSpan={8} className="emptyCell">
+                    No data
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -425,7 +578,9 @@ export default function CrawlerManagerPage() {
                 {modal === "EDIT_SCHEDULE" && "Edit schedule"}
                 {modal === "CANCEL_JOB" && "Cancel job"}
               </div>
-              <button className="closeBtn" onClick={() => setModal("NONE")}>✕</button>
+              <button className="closeBtn" onClick={() => setModal("NONE")}>
+                ✕
+              </button>
             </div>
 
             <div className="modalBody">
@@ -437,25 +592,82 @@ export default function CrawlerManagerPage() {
                   </label>
 
                   <label className="field">
+                    <div className="label">Description</div>
+                    <input className="input" value={pDesc} onChange={(e) => setPDesc(e.target.value)} />
+                  </label>
+
+                  <label className="field">
                     <div className="label">Allow domain (comma-separated)</div>
                     <input className="input" value={pDomains} onChange={(e) => setPDomains(e.target.value)} />
                   </label>
 
                   <label className="field">
-                    <div className="label">Alert to</div>
-                    <input className="input" value={pAlertTo} onChange={(e) => setPAlertTo(e.target.value)} />
+                    <div className="label">Start url</div>
+                    <input
+                      className="input"
+                      value={pStartUrl}
+                      onChange={(e) => setPStartUrl(e.target.value)}
+                      placeholder="https://..."
+                    />
                   </label>
 
-                  <div className="fieldRow">
+                  <label className="field">
+                    <div className="label">To alert email</div>
+                    <input
+                      className="input"
+                      value={pAlertTo}
+                      onChange={(e) => setPAlertTo(e.target.value)}
+                      placeholder="name@org.com"
+                    />
+                  </label>
+
+                  <div className="field">
+                    <div className="label">Cookies (Cookie_name, value)</div>
+
+                    <div className="cookieList">
+                      {pCookies.map((c, idx) => (
+                        <div className="cookieRow" key={idx}>
+                          <input
+                            className="input"
+                            value={c.name}
+                            onChange={(e) => updateCookieRow(idx, { name: e.target.value })}
+                            placeholder="Cookie_name"
+                          />
+                          <input
+                            className="input"
+                            value={c.value}
+                            onChange={(e) => updateCookieRow(idx, { value: e.target.value })}
+                            placeholder="value"
+                          />
+
+                          <button
+                            className="ghostBtn"
+                            onClick={() => removeCookieRow(idx)}
+                            title="Remove cookie row"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button className="ghostBtn" onClick={addCookieRow}>
+                      + Add cookie row
+                    </button>
+
+                    <div className="hint">(ระบบจะเก็บเฉพาะแถวที่ name/value ไม่ว่างทั้งคู่)</div>
+                  </div>
+
+                  <div className="field">
                     <label className="check">
                       <input type="checkbox" checked={pBypass} onChange={(e) => setPBypass(e.target.checked)} />
-                      <span>Bypass ddos (T/F)</span>
+                      <span>Bypass ddos</span>
                     </label>
 
-                    <label className="check">
-                      <input type="checkbox" checked={pCookie} onChange={(e) => setPCookie(e.target.checked)} />
-                      <span>Session cookie (T/F)</span>
-                    </label>
+                    <div className="ddosNote">
+                      *not recommend since it very slow, check ddos protection by yourself by accessing directly to the
+                      website
+                    </div>
                   </div>
                 </div>
               )}
@@ -467,8 +679,15 @@ export default function CrawlerManagerPage() {
                     <input className="input" value={sName} onChange={(e) => setSName(e.target.value)} />
                   </label>
 
+                  <div className="fieldRow">
+                    <label className="check">
+                      <input type="checkbox" checked={sEnabled} onChange={(e) => setSEnabled(e.target.checked)} />
+                      <span>Enable</span>
+                    </label>
+                  </div>
+
                   <label className="field">
-                    <div className="label">Crawler id</div>
+                    <div className="label">Crawler (map scheduler → crawler)</div>
                     <select className="input" value={sCrawlerId} onChange={(e) => setSCrawlerId(e.target.value)}>
                       {crawlerIdOptions.map((c) => (
                         <option key={c.id} value={c.id}>
@@ -476,18 +695,111 @@ export default function CrawlerManagerPage() {
                         </option>
                       ))}
                     </select>
+                    <div className="hint">เลือก crawler ที่มีอยู่ในระบบเพื่อ mapped กับ scheduler</div>
                   </label>
 
                   <label className="field">
-                    <div className="label">Schedule type</div>
-                    <select className="input" value={sType} onChange={(e) => setSType(e.target.value)}>
-                      <option value="CRON">CRON</option>
-                      <option value="INTERVAL">INTERVAL</option>
-                      <option value="MANUAL">MANUAL</option>
+                    <div className="label">Schedule mode</div>
+                    <select className="input" value={sMode} onChange={(e) => setSMode(e.target.value as any)}>
+                      <option value="INTERVAL">Interval</option>
+                      <option value="CRONTAB">Crontab</option>
+                      <option value="CLOCKED">Clocked (run once)</option>
                     </select>
+                    <div className="hint">** 1 scheduler ตั้งได้แค่ 1 รูปแบบเท่านั้น</div>
                   </label>
 
-                  <div className="hint">(วันหลังค่อยเพิ่ม cron expression/interval detail)</div>
+                  {/* ===== Mode: INTERVAL ===== */}
+                  {sMode === "INTERVAL" && (
+                    <div className="field">
+                      <div className="label">Interval</div>
+
+                      <div className="schedule2col">
+                        <label className="field">
+                          <div className="label small">every</div>
+                          <input
+                            className="input"
+                            type="number"
+                            min={1}
+                            step={1}
+                            value={sEvery}
+                            onChange={(e) => setSEvery(Number(e.target.value || 1))}
+                          />
+                        </label>
+
+                        <label className="field">
+                          <div className="label small">period</div>
+                          <select className="input" value={sPeriod} onChange={(e) => setSPeriod(e.target.value as any)}>
+                            <option value="seconds">seconds</option>
+                            <option value="minutes">minutes</option>
+                            <option value="hours">hours</option>
+                            <option value="days">days</option>
+                          </select>
+                        </label>
+                      </div>
+
+                      <div className="hint">
+                        Must be an Integer greater than 0 (e.g., 1, 30, 60, 90) + period ∈
+                        seconds/minutes/hours/days
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ===== Mode: CRONTAB ===== */}
+                  {sMode === "CRONTAB" && (
+                    <div className="field">
+                      <div className="label">Crontab</div>
+
+                      <div className="cronGrid">
+                        <label className="field">
+                          <div className="label small">minute (0-59 or "*")</div>
+                          <input className="input" value={cMinute} onChange={(e) => setCMinute(e.target.value)} />
+                        </label>
+
+                        <label className="field">
+                          <div className="label small">hour (0-23 or "*")</div>
+                          <input className="input" value={cHour} onChange={(e) => setCHour(e.target.value)} />
+                        </label>
+
+                        <label className="field">
+                          <div className="label small">day_of_week (0-6 or "*")</div>
+                          <input className="input" value={cDow} onChange={(e) => setCDow(e.target.value)} />
+                        </label>
+
+                        <label className="field">
+                          <div className="label small">day_of_month (1-31 or "*")</div>
+                          <input className="input" value={cDom} onChange={(e) => setCDom(e.target.value)} />
+                        </label>
+
+                        <label className="field">
+                          <div className="label small">month_of_year (1-12 or "*")</div>
+                          <input className="input" value={cMoy} onChange={(e) => setCMoy(e.target.value)} />
+                        </label>
+                      </div>
+
+                      <div className="hint">ใส่ "*" เพื่อ wildcard หรือใส่เลขตามฟิลด์ (เช่น minute="30", hour="*")</div>
+                    </div>
+                  )}
+
+                  {/* ===== Mode: CLOCKED ===== */}
+                  {sMode === "CLOCKED" && (
+                    <div className="field">
+                      <div className="label">Clocked (run once)</div>
+
+                      <label className="field">
+                        <div className="label small">clocked_time (Bangkok +07:00)</div>
+                        <input
+                          className="input"
+                          type="datetime-local"
+                          value={clockLocal}
+                          onChange={(e) => setClockLocal(e.target.value)}
+                        />
+                      </label>
+
+                      <div className="hint">
+                        ใช้ "+07:00" แทน "Z" เพื่อให้เป็น Bangkok timezone (เช่น 2025-12-15T09:30:00+07:00)
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -497,24 +809,34 @@ export default function CrawlerManagerPage() {
                   <div className="confirmText">
                     Job: <span className="mono">{activeJob?.job_id}</span>
                   </div>
-                  <div className="confirmText muted">(ตอนนี้เปลี่ยนสถานะใน UI ก่อน — วันหลังค่อย POST ไป backend)</div>
+                  <div className="confirmText muted">
+                    (ตอนนี้เปลี่ยนสถานะใน UI ก่อน — วันหลังค่อย POST ไป backend)
+                  </div>
                 </div>
               )}
             </div>
 
             <div className="modalFooter">
-              <button className="ghostBtn" onClick={() => setModal("NONE")}>Close</button>
+              <button className="ghostBtn" onClick={() => setModal("NONE")}>
+                Close
+              </button>
 
               {(modal === "ADD_CRAWLER" || modal === "EDIT_CRAWLER") && (
-                <button className="primaryBtn" onClick={saveCrawler}>Save</button>
+                <button className="primaryBtn" onClick={saveCrawler}>
+                  Save
+                </button>
               )}
 
               {(modal === "ADD_SCHEDULE" || modal === "EDIT_SCHEDULE") && (
-                <button className="primaryBtn" onClick={saveSchedule}>Save</button>
+                <button className="primaryBtn" onClick={saveSchedule}>
+                  Save
+                </button>
               )}
 
               {modal === "CANCEL_JOB" && (
-                <button className="dangerBtn" onClick={confirmCancelJob}>Confirm cancel</button>
+                <button className="dangerBtn" onClick={confirmCancelJob}>
+                  Confirm cancel
+                </button>
               )}
             </div>
           </div>

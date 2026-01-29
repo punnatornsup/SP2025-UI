@@ -1,3 +1,4 @@
+// src/features/ruleManager/hooks.ts
 import { useEffect, useState } from "react";
 import { fetchActiveKeywordRules, fetchSensitivity } from "./service";
 import type { ActiveKeywordRuleDTO, SensitivityDTO } from "./types";

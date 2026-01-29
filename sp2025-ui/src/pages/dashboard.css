@@ -250,3 +250,120 @@
 }
 .clickRow { cursor: pointer; }
 .clickRow:hover { background: rgba(0,0,0,0.03); }
+.sev_CRITICAL { background: rgba(220,0,0,0.10); }
+.sev_HIGH     { background: rgba(255,140,0,0.12); }
+.sev_MED      { background: rgba(255,200,0,0.14); }
+.sev_LOW      { background: rgba(0,160,80,0.12); }
+.sev_NA       { background: rgba(120,120,120,0.16); }
+
+.pillNA {
+  background: rgba(120,120,120,0.16);
+}
+
+.filterRow th {
+  padding: 8px 14px;
+  background: rgba(0,0,0,0.02);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.filterInput,
+.filterSelect {
+  width: 100%;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.12);
+  padding: 0 10px;
+  background: #fff;
+  outline: none;
+  font-size: 12px;
+}
+.pillNA {
+  background: rgba(120,120,120,0.16);
+}
+
+.filterRow th {
+  padding: 8px 14px;
+  background: rgba(0,0,0,0.02);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.filterInput,
+.filterSelect {
+  width: 100%;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.12);
+  padding: 0 10px;
+  background: #fff;
+  outline: none;
+  font-size: 12px;
+}
+
+.filterStack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Severity standalone card */
+.sev_CRITICAL { background: rgba(220,0,0,0.10); }
+.sev_HIGH     { background: rgba(255,140,0,0.12); }
+.sev_MEDIUM   { background: rgba(255,200,0,0.14); }
+.sev_LOW      { background: rgba(0,160,80,0.12); }
+.sev_INFO     { background: rgba(120,120,120,0.16); }
+
+/* Severity pill in table */
+.sevPill {
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-weight: 600;
+  font-size: 12px;
+  display: inline-block;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.sevPill_CRITICAL { background: rgba(220,0,0,0.10); }
+.sevPill_HIGH     { background: rgba(255,140,0,0.12); }
+.sevPill_MEDIUM   { background: rgba(255,200,0,0.14); }
+.sevPill_LOW      { background: rgba(0,160,80,0.12); }
+.sevPill_INFO     { background: rgba(120,120,120,0.16); }
+
+/* Header filter layout */
+.thFilter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.thSelect,
+.thSelectSolo {
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.12);
+  padding: 0 12px;
+  background: #fff;
+  outline: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* make it feel like "ColumnName ▼" */
+.thSelect,
+.thSelectSolo {
+  appearance: auto; /* keep native arrow */
+}
+
+/* input shown only when HAS */
+.thInput {
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.12);
+  padding: 0 12px;
+  background: #fff;
+  outline: none;
+  font-size: 13px;
+  width: 140px;
+}
+
+/* remove old filter row spacing if exists */
+.filterRow { display: none; }

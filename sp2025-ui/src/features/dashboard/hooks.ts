@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchDashboardAlerts, fetchDashboardSummary } from "./service";
-import type { DashboardAlertsResponseDTO, DashboardSummaryDTO } from "./types";
+import type { DashboardAlertsResponseDTO, DashboardSummaryDTO, SeverityLevel } from "./types";
+import type { MockFilters } from "./mock";
 
 export function useDashboardSummary() {
   const [data, setData] = useState<DashboardSummaryDTO | null>(null);
@@ -14,9 +15,7 @@ export function useDashboardSummary() {
 
     fetchDashboardSummary()
       .then((d) => alive && setData(d))
-      .catch((e: unknown) =>
-        alive && setError(e instanceof Error ? e.message : String(e))
-      )
+      .catch((e: unknown) => alive && setError(e instanceof Error ? e.message : String(e)))
       .finally(() => alive && setLoading(false));
 
     return () => {
@@ -27,7 +26,9 @@ export function useDashboardSummary() {
   return { data, loading, error };
 }
 
-export function useDashboardAlerts(q: string, page: number, pageSize: number) {
+export type DashboardColumnFilters = MockFilters & Partial<{ severity: SeverityLevel | "" }>;
+
+export function useDashboardAlerts(q: string, page: number, pageSize: number, filters?: DashboardColumnFilters) {
   const [data, setData] = useState<DashboardAlertsResponseDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,17 +38,15 @@ export function useDashboardAlerts(q: string, page: number, pageSize: number) {
     setLoading(true);
     setError(null);
 
-    fetchDashboardAlerts({ q, page, pageSize })
+    fetchDashboardAlerts({ q, page, pageSize, filters })
       .then((d) => alive && setData(d))
-      .catch((e: unknown) =>
-        alive && setError(e instanceof Error ? e.message : String(e))
-      )
+      .catch((e: unknown) => alive && setError(e instanceof Error ? e.message : String(e)))
       .finally(() => alive && setLoading(false));
 
     return () => {
       alive = false;
     };
-  }, [q, page, pageSize]);
+  }, [q, page, pageSize, JSON.stringify(filters ?? {})]);
 
   return { data, loading, error };
 }

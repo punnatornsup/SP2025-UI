@@ -1,10 +1,10 @@
+// src/features/crawlerManager/service.ts
 import { api } from "@/lib/api";
 import { mockCrawlerProfiles, mockScheduleJobs, mockJobHistory, mockWorkersStatus } from "./mock";
 import type { CrawlerProfileDTO, ScheduleJobDTO, JobHistoryDTO, WorkerStatusDTO } from "./types";
 
 const USE_MOCK = true;
 
-// ===== GET (list) =====
 export async function fetchCrawlerProfiles(): Promise<CrawlerProfileDTO[]> {
   if (USE_MOCK) return mockCrawlerProfiles;
   return api<CrawlerProfileDTO[]>("/crawler/profiles");
@@ -25,7 +25,7 @@ export async function fetchWorkersStatus(): Promise<WorkerStatusDTO[]> {
   return api<WorkerStatusDTO[]>("/crawler/workers/status");
 }
 
-// ===== POST/PUT/DELETE (รองรับอนาคต) =====
+// (อนาคต) create/update payload จะต้องส่ง schedule_mode + interval/crontab/clocked ให้ตรง backend
 export async function createCrawlerProfile(_: Omit<CrawlerProfileDTO, "id">): Promise<CrawlerProfileDTO> {
   return api<CrawlerProfileDTO>("/crawler/profiles", { method: "POST" });
 }

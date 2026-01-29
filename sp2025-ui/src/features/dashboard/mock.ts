@@ -1,76 +1,129 @@
+// ... imports เดิม
 import type { DashboardAlertsResponseDTO, DashboardSummaryDTO, SeverityLevel } from "./types";
 
 export const mockSummary: DashboardSummaryDTO = {
-  severity_counts: { CRITICAL: 30, HIGH: 12, MED: 501, LOW: 2912 },
+  severity_counts: { CRITICAL: 30, HIGH: 12, MEDIUM: 501, LOW: 2912, INFO: 27 },
   top_keywords: [
     { keyword: "Thailand", count: 178 },
     { keyword: "co.th", count: 45 },
     { keyword: "go.th", count: 12 },
     { keyword: "bangchak.co.th", count: 7 },
-    { keyword: "oc.th", count: 4 },
+    { keyword: "N/A", count: 27 },
   ],
 };
 
 function pickSeverity(i: number): SeverityLevel {
+  if (i % 11 === 0) return "INFO";
   if (i % 17 === 0) return "CRITICAL";
   if (i % 7 === 0) return "HIGH";
-  if (i % 3 === 0) return "MED";
+  if (i % 3 === 0) return "MEDIUM";
   return "LOW";
 }
 
-export function mockAlerts(q: string, page: number, pageSize: number): DashboardAlertsResponseDTO {
+export type MockFilters = Partial<{
+  keyword_mode: "" | "NA" | "HAS";
+  keyword: string;
+  ai_tags_mode: "" | "NA" | "HAS";
+  ai_tags: string;
+  status: "" | "reviewed" | "unreviewed";
+  severity: SeverityLevel | "";
+}>;
+
+export function mockAlerts(q: string, page: number, pageSize: number, filters?: MockFilters): DashboardAlertsResponseDTO {
   const all = Array.from({ length: 141 }).map((_, i) => {
-    const sev = pickSeverity(i + 1);
+    const idx = i + 1;
+    const sev = pickSeverity(idx);
+
+    // ✅ Multi-tag more frequently:
+    // - every 4th row: 2 tags
+    // - every 10th row: 3 tags
+    // - every 11th row: N/A (empty)
+    let aiTags: string[] = [];
+
+    if (idx % 11 === 0) {
+      aiTags = []; // N/A
+    } else if (idx % 10 === 0) {
+      aiTags = ["Credit Card Number", "THAI-DATA", "FINANCIAL-SECTOR"];
+    } else if (idx % 4 === 0) {
+      aiTags = ["Credit Card Number", "THAI-DATA"];
+    } else if (idx % 2 === 0) {
+      aiTags = ["Credit Card Number"];
+    } else {
+      aiTags = ["Abusive Language"];
+    }
+
+    // Keyword: empty some rows => N/A
+    const keyword = idx % 9 === 0 ? "" : idx % 3 === 0 ? "Thailand" : "co.th";
 
     return {
-      id: `row-${i + 1}`,
-      topic_name: `CreditCard free distribut ${i + 1}`,
-      keyword: i % 3 === 0 ? "Thailand" : "co.th",
-      ai_tags: i % 2 === 0 ? ["Credit Card Number"] : ["Abusive Language"],
+      id: `row-${idx}`,
+      topic_name: `CreditCard free distribut ${idx}`,
+      keyword,
+      ai_tags: aiTags,
       alert_type: i % 4 === 0 ? "Leak" : "Mention",
       post_at: "2025-07-07T06:00:00Z",
       date: "2025-07-07",
       status: i % 5 === 0 ? "reviewed" : "unreviewed",
-
-      // ===== detail fields for modal =====
       severity: sev,
-      final_score: Math.round((0.55 + (i % 40) / 100) * 100) / 100, // 0.55-0.94
-      fetched_at: "2025-07-07T06:10:00Z",
-      full_url: `https://example.onion/thread/${i + 1}`,
-      crawler_id: `crawler-${(i % 6) + 1}`,
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
-        "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. " +
-        "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.\n\n" +
-        "Indicators:\n- Possible credit card pattern\n- Mentioned Thailand / .co.th domains\n- Actor language: abusive/marketplace",
     };
   });
 
-  const query = q.trim().toLowerCase();
-  const filtered = !query
+  const norm = (s: unknown) => String(s ?? "").trim().toLowerCase();
+  const query = norm(q);
+
+  let filtered = !query
     ? all
     : all.filter((r) =>
         [
           r.topic_name,
-          r.keyword,
+          r.keyword || "N/A",
           r.alert_type,
           r.status,
           r.post_at,
           r.date,
           r.severity ?? "",
-          String(r.final_score ?? ""),
-          r.full_url ?? "",
-          r.crawler_id ?? "",
-          ...(r.ai_tags ?? []),
+          ...(r.ai_tags?.length ? r.ai_tags : ["N/A"]),
         ]
           .join(" ")
           .toLowerCase()
           .includes(query)
       );
 
+  // Apply filters: Keyword (NA/HAS), AI Tags (NA/HAS), Status, Severity
+  if (filters) {
+    const km = filters.keyword_mode ?? "";
+    const am = filters.ai_tags_mode ?? "";
+    const ktxt = norm(filters.keyword);
+    const atxt = norm(filters.ai_tags);
+    const st = norm(filters.status);
+    const sv = norm(filters.severity);
+
+    filtered = filtered.filter((r) => {
+      const keywordNA = norm(r.keyword) === "";
+      const tagsNA = (r.ai_tags?.length ?? 0) === 0;
+
+      if (km === "NA" && !keywordNA) return false;
+      if (km === "HAS") {
+        if (keywordNA) return false;
+        if (ktxt && !norm(r.keyword).includes(ktxt)) return false;
+      }
+
+      if (am === "NA" && !tagsNA) return false;
+      if (am === "HAS") {
+        if (tagsNA) return false;
+        const joined = (r.ai_tags ?? []).map((t) => norm(t)).join(",");
+        if (atxt && !joined.includes(atxt)) return false;
+      }
+
+      if (st && norm(r.status) !== st) return false;
+      if (sv && norm(r.severity) !== sv) return false;
+
+      return true;
+    });
+  }
+
   const total = filtered.length;
   const start = (page - 1) * pageSize;
   const items = filtered.slice(start, start + pageSize);
-
   return { total, page, page_size: pageSize, items };
 }

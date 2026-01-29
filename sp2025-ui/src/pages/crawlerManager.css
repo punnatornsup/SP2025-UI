@@ -1,176 +1,27 @@
-.cmRoot { display: flex; flex-direction: column; gap: 14px; }
-.cmHeader { display: flex; align-items: center; justify-content: space-between; }
-.cmTitle { margin: 0; font-size: 18px; }
+/* เพิ่มท้ายไฟล์ crawlerManager.css */
 
-.cmGridTop {
+/* cookie rows */
+.cookieList { display: flex; flex-direction: column; gap: 10px; }
+.cookieRow { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: center; }
+.ddosNote { margin-top: 6px; font-size: 12px; color: rgba(0,0,0,0.55); }
+
+/* schedule layout */
+.label.small { font-size: 11px; font-weight: 900; color: rgba(0,0,0,0.55); }
+
+.schedule2col {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  align-items: start;
-}
-
-.card { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 14px; padding: 14px; }
-.cmCard { min-width: 0; }
-
-.cardHeaderRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  margin-bottom: 10px;
 }
 
-.cardTitle { font-weight: 900; }
-
-.tableWrap { width: 100%; overflow: auto; }
-.table { width: 100%; border-collapse: collapse; min-width: 860px; }
-.table thead th {
-  text-align: left;
-  font-size: 12px;
-  padding: 12px 14px;
-  background: rgba(0,0,0,0.03);
-  border-bottom: 1px solid rgba(0,0,0,0.08);
-  white-space: nowrap;
-}
-.table tbody td {
-  padding: 12px 14px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-  vertical-align: top;
-  font-size: 13px;
+.cronGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
-.tdAction { width: 1%; white-space: nowrap; }
-.emptyCell { text-align: center; padding: 18px !important; color: rgba(0,0,0,0.55); }
-
-.bold { font-weight: 800; }
-.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; }
-
-.infoBox {
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(0,0,0,0.04);
-  border: 1px solid rgba(0,0,0,0.06);
-}
-.errorBox {
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(220,0,0,0.08);
-  border: 1px solid rgba(220,0,0,0.14);
-}
-
-.primaryBtn {
-  border: 1px solid rgba(0,0,0,0.12);
-  background: rgba(0,0,0,0.9);
-  color: #fff;
-  border-radius: 12px;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-weight: 800;
-}
-.primaryBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.ghostBtn {
-  border: 1px solid rgba(0,0,0,0.12);
-  background: #fff;
-  border-radius: 12px;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-weight: 800;
-}
-
-.dangerBtn {
-  border: 1px solid rgba(220,0,0,0.25);
-  background: rgba(220,0,0,0.10);
-  border-radius: 12px;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-weight: 900;
-}
-.dangerBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.muted { color: rgba(0,0,0,0.55); font-size: 13px; }
-
-.status {
-  font-weight: 900;
-  font-size: 12px;
-  padding: 5px 10px;
-  border-radius: 999px;
-  display: inline-block;
-  border: 1px solid rgba(0,0,0,0.10);
-}
-.status.ok { background: rgba(0,160,80,0.18); }
-.status.bad { background: rgba(220,0,0,0.14); }
-.status.pending { background: rgba(255,200,0,0.18); }
-.status.muted { background: rgba(0,0,0,0.06); }
-
-/* ===== Modal ===== */
-.modalOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 18px;
-  z-index: 999;
-}
-.modalShell {
-  width: min(720px, 100%);
-  background: #fff;
-  border-radius: 18px;
-  border: 1px solid rgba(0,0,0,0.14);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-  overflow: hidden;
-}
-.modalHeader {
-  height: 56px;
-  padding: 0 14px;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.modalTitle { font-weight: 900; }
-.closeBtn {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: #fff;
-  cursor: pointer;
-}
-.modalBody { padding: 14px; }
-.modalFooter {
-  padding: 12px 14px;
-  border-top: 1px solid rgba(0,0,0,0.08);
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.formGrid { display: flex; flex-direction: column; gap: 12px; }
-.field .label { font-size: 12px; font-weight: 900; color: rgba(0,0,0,0.65); margin-bottom: 6px; }
-.input {
-  width: 100%;
-  height: 40px;
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.12);
-  padding: 0 12px;
-  outline: none;
-  box-sizing: border-box;
-}
-.fieldRow { display: flex; gap: 14px; flex-wrap: wrap; }
-.check { display: flex; align-items: center; gap: 8px; font-weight: 800; }
-.hint { font-size: 12px; color: rgba(0,0,0,0.55); }
-
-.confirmBox { display: flex; flex-direction: column; gap: 8px; }
-.confirmTitle { font-weight: 900; font-size: 16px; }
-.confirmText { font-weight: 700; }
-
-@media (max-width: 1100px) {
-  .cmGridTop { grid-template-columns: 1fr; }
-}
-.totalRow td {
-  background: rgba(0,0,0,0.03);
-  border-top: 1px solid rgba(0,0,0,0.10);
+@media (max-width: 900px) {
+  .cookieRow { grid-template-columns: 1fr; }
+  .schedule2col { grid-template-columns: 1fr; }
+  .cronGrid { grid-template-columns: 1fr; }
 }

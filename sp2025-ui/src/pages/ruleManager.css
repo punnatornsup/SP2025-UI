@@ -156,3 +156,169 @@
 @media (max-width: 900px) {
   .grid2, .grid3 { grid-template-columns: 1fr; }
 }
+/* src/features/ruleManager/ruleManager.css */
+
+/* (ถ้ามีของเดิมอยู่แล้ว ให้ merge เฉพาะส่วนที่ไม่มี) */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.pill.ok { background: rgba(0, 200, 120, 0.12); }
+.pill.muted { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.6); }
+
+.pill.sev_LOW { background: rgba(0,0,0,0.06); }
+.pill.sev_MED { background: rgba(255, 180, 0, 0.14); }
+.pill.sev_HIGH { background: rgba(255, 80, 0, 0.14); }
+.pill.sev_CRITICAL { background: rgba(255, 0, 0, 0.14); }
+
+.gammaBox { padding: 16px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.08); }
+.gammaRow { display:flex; align-items:center; gap: 12px; }
+.gammaLabel { font-weight: 900; }
+.gammaSlider { width: 100%; }
+.gammaScale { display:flex; justify-content: space-between; margin-top: 8px; opacity: 0.7; }
+
+/* ===== RuleManager: rubric UX additions ===== */
+
+.rmTableWide { min-width: 1180px; }
+
+.textarea {
+  width: 100%;
+  min-height: 96px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  padding: 10px 12px;
+  outline: none;
+  box-sizing: border-box;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.modalWide { width: min(1100px, 100%); }
+
+.rmModalGrid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .rmModalGrid { grid-template-columns: 1fr; }
+}
+
+.rubricCards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .rubricCards { grid-template-columns: 1fr; }
+}
+
+.cbGrid {
+  grid-template-columns: 1fr;
+}
+
+.rubricCard {
+  text-align: left;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: transform 0.05s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+.rubricCard:hover { transform: translateY(-1px); }
+
+.rubricCard.active {
+  border-color: rgba(0,0,0,0.45);
+  background: rgba(0,0,0,0.03);
+}
+
+.rubricTitle { font-weight: 900; font-size: 13px; margin-bottom: 6px; }
+.rubricSub { font-size: 12px; color: rgba(0,0,0,0.6); line-height: 1.35; }
+
+.rubricList {
+  margin: 0;
+  padding-left: 16px;
+  color: rgba(0,0,0,0.65);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.rubricRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .rubricRow { grid-template-columns: 1fr 1fr; }
+}
+
+.chipBtn {
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+  padding: 10px 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.chipBtn.active {
+  border-color: rgba(0,0,0,0.45);
+  background: rgba(0,0,0,0.03);
+}
+
+.chipTop { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.chipDesc { font-size: 12px; color: rgba(0,0,0,0.6); line-height: 1.25; }
+
+.previewCard {
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(0,0,0,0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.previewTitle { font-weight: 900; }
+.previewFormula { font-size: 12px; color: rgba(0,0,0,0.65); }
+
+.previewScoreRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.previewScore { font-size: 28px; font-weight: 900; }
+
+.previewExplain {
+  border-top: 1px solid rgba(0,0,0,0.08);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.exRow { display: flex; align-items: center; justify-content: space-between; }
+.exKey { font-weight: 900; color: rgba(0,0,0,0.65); }
+.exVal { font-weight: 900; }
+
+.previewHint {
+  font-size: 12px;
+  color: rgba(0,0,0,0.6);
+}
+
+.previewBullets {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12px;
+  color: rgba(0,0,0,0.65);
+  line-height: 1.35;
+}
