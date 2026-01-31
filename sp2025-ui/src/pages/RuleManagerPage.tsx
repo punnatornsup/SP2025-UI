@@ -1,7 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import "./formTokens.css";
 import "./ruleManager.css";
 
 import { useActiveKeywordRules, useSensitivity } from "@/features/ruleManager/hooks";
+import { updateGamma } from "@/features/ruleManager/service";
 import type { ActiveKeywordRuleDTO, RuleInputDTO, SeverityLevel } from "@/features/ruleManager/types";
 
 type ModalMode = "NONE" | "ADD_RULE" | "EDIT_RULE";
@@ -20,16 +22,14 @@ function clampInt(x: number, lo: number, hi: number) {
 }
 
 /**
- * ✅ Formula from Req:
  * Final Severity = (DPC × EI) + CB
  */
 function calcFinalSeverity(dpc: number, ei: number, cb: number) {
-  return Number(((dpc * ei) + cb).toFixed(2));
+  return Number(dpc * ei + cb);
 }
 
 /**
- * ✅ Map score -> label (you can tune thresholds later)
- * Keep deterministic & explainable.
+ * Deterministic mapping (tune later if needed)
  */
 function mapSeverityLevel(score: number): SeverityLevel {
   if (score < 2.0) return "LOW";
@@ -38,44 +38,61 @@ function mapSeverityLevel(score: number): SeverityLevel {
   return "CRITICAL";
 }
 
-// ----- UX presets (makes rubric easy) -----
-const EI_PRESETS: Array<{ value: number; label: string; desc: string }> = [
-  { value: 0.25, label: "0.25", desc: "Hard to identify; weak linkage." },
-  { value: 0.5, label: "0.50", desc: "Possible via public linkage; moderate effort." },
-  { value: 0.75, label: "0.75", desc: "Reasonably identifiable with common linkage." },
-  { value: 1.0, label: "1.00", desc: "Directly identifiable (explicit identifier)." },
+/* ---------- Definitions (ENISA-aligned, short + readable) ---------- */
+const RUBRIC_DEFS = {
+  dpc:
+    "Data Processing Context (DPC) measures the intrinsic sensitivity and potential impact of inferred data (type of data + degree of inference/harm), independent of identifiability.",
+  ei:
+    "Ease of Identification (EI) indicates how easily an individual/entity can be identified directly or via reasonable linkage with publicly available information.",
+  cb:
+    "Circumstances of the Breach (CB) captures aggravating context beyond the data itself (e.g., financial sector, regulators, critical infrastructure, high-impact entities).",
+} as const;
+
+/* ---------- EI presets ---------- */
+const EI_PRESETS: Array<{ value: number; label: string; title: string; desc: string }> = [
+  { value: 0.25, label: "0.25", title: "Hard to identify", desc: "Weak linkage; high effort to identify." },
+  { value: 0.5, label: "0.50", title: "Possible with linkage", desc: "Feasible via public sources with moderate effort." },
+  { value: 0.75, label: "0.75", title: "Reasonably identifiable", desc: "Common linkage; limited effort to identify." },
+  { value: 1.0, label: "1.00", title: "Directly identifiable", desc: "Explicit identifiers or direct unique reference." },
 ];
 
-const DPC_LEVELS: Array<{ value: number; title: string; examples: string[] }> = [
+/* ---------- DPC levels (compact but full meaning) ---------- */
+const DPC_LEVELS: Array<{ value: number; title: string; summary: string; examples: string[] }> = [
   {
     value: 1,
     title: "1 — Basic data (low inference)",
-    examples: ["org/company name", "bank/regulator name", "full name (standalone)", "education / work history"],
+    summary: "Basic personal/org data; does not by itself enable profiling or sensitive inference.",
+    examples: ["Organization/company name", "Bank/regulator name", "Contact details (generic)", "Education / family life (generic)"],
   },
   {
     value: 2,
     title: "2 — Enables basic profiling",
-    examples: ['("Job title" + "Company")', '("Education level" + "University")', '("Role" + "Industry")'],
+    summary: "Combination of clues supports assumptions about social/professional/economic status.",
+    examples: ['("Job title" + "Specific company")', '("Education level" + "University")', '("Role" + "Industry sector")'],
   },
   {
     value: 3,
     title: "3 — Sensitive inference possible",
-    examples: ['("Membership" + "Political party")', '("Attendance record" + "Religious org")', '("Patient status" + "Treatment center")'],
+    summary: "Enables inference of sensitive attributes, even if not explicitly stated.",
+    examples: ['("Membership status" + "Political party")', '("Attendance record" + "Religious org")', '("Patient status" + "Treatment center")'],
   },
   {
     value: 4,
     title: "4 — High harm / safety risk",
-    examples: ['("Full name" + "Exact address")', '("Vulnerable person" + "Location/School")', '("Sensitive role" + "Covert location")'],
+    summary: "Could directly threaten safety/security or expose vulnerable individuals/groups).",
+    examples: ['("Full name" + "Exact home address")', '("Vulnerable person" + "School/location")', '("Sensitive role" + "Covert location")'],
   },
 ];
 
-const CB_LEVELS: Array<{ value: number; title: string; desc: string }> = [
-  { value: 0, title: "0 — No aggravating context", desc: "General mention; no critical-entity context." },
-  { value: 1, title: "1 — Notable org / sector context", desc: "May increase impact but limited operational risk." },
-  { value: 2, title: "2 — High-impact entity context", desc: "Financial sector / large institutions / widely targeted entities." },
-  { value: 3, title: "3 — Critical operator / regulator context", desc: "Regulators, critical infrastructure operators, key service providers." },
-  { value: 4, title: "4 — National-level / systemic impact context", desc: "Could drive systemic disruption, national-level consequences." },
+/* ---------- CB levels ---------- */
+const CB_LEVELS: Array<{ value: number; title: string; summary: string }> = [
+  { value: 0, title: "0 — No aggravating context", summary: "General mention; no critical-entity context." },
+  { value: 1, title: "1 — Notable org / sector context", summary: "Impact increases, but limited operational/regulatory implications." },
+  { value: 2, title: "2 — High-impact entity context", summary: "Large institutions, financial sector, widely targeted entities." },
+  { value: 3, title: "3 — Critical operator / regulator context", summary: "Regulators, critical infrastructure operators, key service providers." },
+  { value: 4, title: "4 — Systemic / national-level context", summary: "Could drive systemic disruption or national-level consequences." },
 ];
+
 
 export default function RuleManagerPage() {
   const rules = useActiveKeywordRules();
@@ -84,34 +101,91 @@ export default function RuleManagerPage() {
   const rows = rules.data ?? [];
   const infoLoading = rules.loading || sensitivity.loading;
   const infoError = rules.error || sensitivity.error;
+  // -----------------
+  // Sensitivity (Gamma) — Option A
+  // - Card max-width for readable UI
+  // - Slider width <= 500px (responsive down)
+  // - Real-time preview (gammaDraft)
+  // - Persist ONLY when user clicks Save
+  // -----------------
+  const savedGamma = clamp01(sensitivity.data?.gamma ?? 0);
+  const savedAt = sensitivity.data?.updated_at ?? "";
 
-  // gamma (controlled) — not used in the ENISA formula directly (kept as system sensitivity knob)
-  const gamma = sensitivity.data?.gamma ?? 0;
-  const gammaLabel = useMemo(() => gamma.toFixed(2), [gamma]);
+  const [gammaDraft, setGammaDraft] = useState<number>(savedGamma);
+  const [gammaSaving, setGammaSaving] = useState(false);
+  const [gammaSaveError, setGammaSaveError] = useState<string | null>(null);
 
-  // modal + form states
+  useEffect(() => {
+    setGammaDraft(savedGamma);
+  }, [savedGamma]);
+
+  const gammaLabel = useMemo(() => gammaDraft.toFixed(2), [gammaDraft]);
+  const gammaDirty = useMemo(() => Math.abs(gammaDraft - savedGamma) > 1e-9, [gammaDraft, savedGamma]);
+
   const [modal, setModal] = useState<ModalMode>("NONE");
   const [active, setActive] = useState<ActiveKeywordRuleDTO | null>(null);
 
   // ✅ 5 required fields (client)
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [dpc, setDpc] = useState<number | null>(null);
+  const [ei, setEi] = useState<number | null>(null);
+  const [cb, setCb] = useState<number | null>(null);
 
-  const [dpc, setDpc] = useState<number>(1);
-  const [ei, setEi] = useState<number>(0.75);
-  const [cb, setCb] = useState<number>(0);
+  // tabbed scoring (no page scroll)
+  const [scoreTab, setScoreTab] = useState<"DPC" | "EI" | "CB">("DPC");
 
-  const finalSeverity = useMemo(() => calcFinalSeverity(dpc, ei, cb), [dpc, ei, cb]);
-  const severityLevel = useMemo(() => mapSeverityLevel(finalSeverity), [finalSeverity]);
+  // -----------------
+  // Form validation (Rule modal)
+  // - Description is optional
+  // - DPC/EI/CB must be explicitly selected (no defaults)
+  // -----------------
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [touched, setTouched] = useState({ title: false, dpc: false, ei: false, cb: false });
+
+  const titleOk = title.trim().length > 0;
+  const dpcOk = dpc != null;
+  const eiOk = ei != null;
+  const cbOk = cb != null;
+  const formOk = titleOk && dpcOk && eiOk && cbOk;
+
+  const showTitleErr = (submitAttempted || touched.title) && !titleOk;
+  const showDpcErr = (submitAttempted || touched.dpc) && !dpcOk;
+  const showEiErr = (submitAttempted || touched.ei) && !eiOk;
+  const showCbErr = (submitAttempted || touched.cb) && !cbOk;
+
+
+  useEffect(() => {
+    if (modal === "NONE") return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setModal("NONE");
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [modal]);
+
+  const finalSeverity = useMemo(() => {
+    if (dpc == null || ei == null || cb == null) return null;
+    return calcFinalSeverity(dpc, ei, cb);
+  }, [dpc, ei, cb]);
+  const severityLevel = useMemo(() => {
+    if (finalSeverity == null) return null;
+    return mapSeverityLevel(finalSeverity);
+  }, [finalSeverity]);
+
+
 
   function openAdd() {
     setActive(null);
     setTitle("");
     setDescription("");
-    setDpc(1);
-    setEi(0.75);
-    setCb(0);
+    setDpc(null);
+    setEi(null);
+    setCb(null);
     setModal("ADD_RULE");
+    setScoreTab("DPC");
+    setSubmitAttempted(false);
+    setTouched({ title: false, dpc: false, ei: false, cb: false });
   }
 
   function openEdit(r: ActiveKeywordRuleDTO) {
@@ -122,21 +196,30 @@ export default function RuleManagerPage() {
     setEi(r.ei);
     setCb(r.cb);
     setModal("EDIT_RULE");
+    setScoreTab("DPC");
+    setSubmitAttempted(false);
+    setTouched({ title: false, dpc: false, ei: false, cb: false });
   }
 
   function buildPayload(): RuleInputDTO {
     return {
       title: (title || "").trim() || "Untitled rule",
       description: (description || "").trim() || "-",
-      dpc: clampInt(dpc, 1, 4),
-      ei: clamp01(Number(ei)),
-      cb: clampInt(cb, 0, 4),
+      dpc: clampInt(dpc as number, 1, 4),
+      ei: clamp01(Number(ei as number)),
+      cb: clampInt(cb as number, 0, 4),
     };
+  }
+
+  function onSubmitRule() {
+    setSubmitAttempted(true);
+    if (!formOk) return;
+    saveRule();
   }
 
   function saveRule() {
     const payload = buildPayload();
-    const score = calcFinalSeverity(payload.dpc, payload.ei, payload.cb);
+    const score = Number(calcFinalSeverity(payload.dpc, payload.ei, payload.cb).toFixed(2));
     const level = mapSeverityLevel(score);
 
     if (modal === "ADD_RULE") {
@@ -144,7 +227,6 @@ export default function RuleManagerPage() {
         id: genId(),
         created_at: new Date().toISOString(),
         status: "ACTIVE",
-
         ...payload,
         final_severity: score,
         severity_level: level,
@@ -155,14 +237,7 @@ export default function RuleManagerPage() {
     if (modal === "EDIT_RULE" && active) {
       rules.setData((prev) =>
         (prev ?? []).map((x) =>
-          x.id === active.id
-            ? {
-                ...x,
-                ...payload,
-                final_severity: score,
-                severity_level: level,
-              }
-            : x
+          x.id === active.id ? { ...x, ...payload, final_severity: score, severity_level: level } : x
         )
       );
     }
@@ -170,12 +245,22 @@ export default function RuleManagerPage() {
     setModal("NONE");
   }
 
-  // UI-only gamma update
   function onGammaChange(next: number) {
-    sensitivity.setData((prev) => ({
-      gamma: clamp01(next),
-      updated_at: prev?.updated_at ?? new Date().toISOString(),
-    }));
+    setGammaDraft(clamp01(next));
+  }
+
+  async function saveGamma() {
+    setGammaSaveError(null);
+    setGammaSaving(true);
+    try {
+      const res = await updateGamma({ gamma: clamp01(gammaDraft) });
+      sensitivity.setData(res);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setGammaSaveError(msg || "Failed to save gamma");
+    } finally {
+      setGammaSaving(false);
+    }
   }
 
   return (
@@ -191,7 +276,9 @@ export default function RuleManagerPage() {
       <section className="card rmCard">
         <div className="cardHeaderRow">
           <div className="cardTitle">Active Keyword</div>
-          <button className="primaryBtn" onClick={openAdd}>+ Add rule</button>
+          <button className="primaryBtn" onClick={openAdd}>
+            + Add rule
+          </button>
         </div>
 
         <div className="tableWrap">
@@ -224,78 +311,105 @@ export default function RuleManagerPage() {
                   </td>
                   <td className="mono">{r.created_at}</td>
                   <td className="tdAction">
-                    <button className="ghostBtn" onClick={() => openEdit(r)}>Edit</button>
+                    <button className="ghostBtn" onClick={() => openEdit(r)}>
+                      Edit
+                    </button>
                   </td>
                 </tr>
               ))}
 
               {!rules.loading && rows.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="emptyCell">No data</td>
+                  <td colSpan={9} className="emptyCell">
+                    No data
+                  </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
       </section>
-
       {/* Sensitivity */}
-      <section className="card rmCard">
+      <section className="card rmCard rmCardSensitivity">
         <div className="cardHeaderRow">
           <div className="cardTitle">Sensitivity</div>
-          <div className="muted">Gamma: <span className="mono">{gammaLabel}</span></div>
+          <div className="muted">
+            Last saved: <span className="mono">{savedAt || "-"}</span>
+          </div>
         </div>
 
         <div className="gammaBox">
-          <div className="gammaRow">
-            <div className="gammaLabel">Gamma</div>
-            <input
-              className="gammaSlider"
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={gamma}
-              onChange={(e) => onGammaChange(Number(e.target.value))}
-            />
+          <div className="gammaGrid">
+            <div className="gammaLabel">
+              Gamma <span className="mono gammaInlineVal">{gammaLabel}</span>
+            </div>
+
+            <div className="gammaTrack">
+              <input
+                className="gammaSlider"
+                type="range"
+                min={0}
+                max={1}
+                step={0.01}
+                value={gammaDraft}
+                onChange={(e) => onGammaChange(Number(e.target.value))}
+              />
+
+              <button
+                className="primaryBtn gammaSaveBtn"
+                onClick={saveGamma}
+                disabled={!gammaDirty || gammaSaving}
+                title={gammaDirty ? "Save gamma" : "No changes"}
+              >
+                {gammaSaving ? "Saving…" : "Save"}
+              </button>
+
+              <div className="gammaScale" aria-hidden="true">
+                <div className="mono">0</div>
+                <div className="mono">1</div>
+              </div>
+            </div>
           </div>
 
-          <div className="gammaScale">
-            <div className="mono">0</div>
-            <div className="mono">1</div>
-          </div>
+          {gammaSaveError && <div className="errorBox">{gammaSaveError}</div>}
 
-          <div className="hint">
-            (Gamma เป็น system sensitivity knob — สูตร severity ของ rule ใช้: (DPC×EI)+CB)
-          </div>
+          <div className="hint">(Gamma เป็น system sensitivity knob — สูตร severity ของ rule ใช้: (DPC×EI)+CB)</div>
         </div>
       </section>
 
       {/* Modal */}
       {modal !== "NONE" && (
         <div className="modalOverlay" onMouseDown={() => setModal("NONE")}>
-          <div className="modalShell modalWide" onMouseDown={(e) => e.stopPropagation()}>
+          <div className="modalShell" onMouseDown={(e) => e.stopPropagation()}>
             <div className="modalHeader">
               <div className="modalTitle">{modal === "ADD_RULE" ? "Add rule" : "Edit rule"}</div>
-              <button className="closeBtn" onClick={() => setModal("NONE")}>✕</button>
+              <button className="closeBtn" onClick={() => setModal("NONE")}>
+                ✕
+              </button>
             </div>
 
             <div className="modalBody">
               <div className="rmModalGrid">
-                {/* LEFT: form */}
+                {/* LEFT */}
                 <div className="rmModalLeft">
                   <div className="formGrid">
-                    {/* 5 fields */}
                     <label className="field">
                       <div className="label">Keyword title</div>
-                      <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g., paetongtarn shinawatra" />
+                      <input
+                        className={`input ${showTitleErr ? "inputInvalid" : ""}`}
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        onBlur={() => setTouched((t) => ({ ...t, title: true }))}
+                        placeholder="e.g., leaked bank account list"
+                      />
+                      {showTitleErr && <div className="fieldError">Please enter a keyword title.</div>}
                       <div className="hint">ชื่อ keyword rule ที่ระบบจะใช้ match ใน content</div>
                     </label>
 
                     <label className="field">
                       <div className="label">Description</div>
                       <textarea
-                        className="textarea"
+                        className="textarea textareaCompact"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Explain what this rule indicates when matched…"
@@ -303,120 +417,200 @@ export default function RuleManagerPage() {
                       <div className="hint">อธิบายสั้น ๆ ว่าการ match นี้บ่งชี้ข้อมูลประเภทไหน/ผลกระทบอะไร</div>
                     </label>
 
-                    {/* DPC picker */}
-                    <div className="field">
-                      <div className="label">DPC — Data Processing Context</div>
-                      <div className="rubricCards">
-                        {DPC_LEVELS.map((opt) => (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            className={`rubricCard ${dpc === opt.value ? "active" : ""}`}
-                            onClick={() => setDpc(opt.value)}
-                          >
-                            <div className="rubricTitle">{opt.title}</div>
-                            <ul className="rubricList">
-                              {opt.examples.slice(0, 3).map((ex, i) => <li key={i}>{ex}</li>)}
-                            </ul>
-                          </button>
-                        ))}
+                    {/* Preview */}
+                    <div className="previewCard previewCardLeft">
+                      <div className="previewTitle">Severity Preview</div>
+                      <div className="previewFormula mono">Final Severity = (DPC × EI) + CB</div>
+
+                      <div className="previewScoreRow">
+                        <div className="previewScore mono">{finalSeverity == null ? "--" : finalSeverity.toFixed(2)}</div>
+                        <span className={`pill sev_${severityLevel ?? "--"}`}>{severityLevel ?? "--"}</span>
+                      </div>
+
+                      <div className="previewExplain">
+                        <div className="exRow">
+                          <div className="exKey">DPC</div>
+                          <div className="exVal mono">{dpc ?? "--"}</div>
+                        </div>
+                        <div className="exRow">
+                          <div className="exKey">EI</div>
+                          <div className="exVal mono">{ei == null ? "--" : Number(ei).toFixed(2)}</div>
+                        </div>
+                        <div className="exRow">
+                          <div className="exKey">CB</div>
+                          <div className="exVal mono">{cb ?? "--"}</div>
+                        </div>
+                      </div>
+
+                      <div className="howtoBox">
+                        <div className="howtoTitle">How to fill DPC / EI / CB</div>
+                        <ul className="previewBullets">
+                          <li><span className="bold">DPC</span> = what the data is (intrinsic sensitivity/impact)</li>
+                          <li><span className="bold">EI</span> = who it points to (identifiability)</li>
+                          <li><span className="bold">CB</span> = how bad the context is (aggravating factors)</li>
+                        </ul>
+                        <div className="previewHint">
+                          Guideline: ถ้า keyword ทำให้ inference sensitive attribute / fraud risk → เริ่มจาก DPC 3–4
+                        </div>
                       </div>
                     </div>
 
-                    {/* EI */}
-                    <div className="field">
-                      <div className="label">EI — Ease of Identification</div>
-                      <div className="rubricRow">
-                        {EI_PRESETS.map((opt) => (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            className={`chipBtn ${Number(ei) === opt.value ? "active" : ""}`}
-                            onClick={() => setEi(opt.value)}
-                          >
-                            <div className="chipTop">
-                              <span className="mono">{opt.label}</span>
-                            </div>
-                            <div className="chipDesc">{opt.desc}</div>
-                          </button>
-                        ))}
+                    {/* Level mapping */}
+                    <div className="previewCard previewCardLeft">
+                      <div className="previewTitle">Level mapping</div>
+                      <ul className="previewBullets">
+                        <li>&lt; 2.0 → LOW</li>
+                        <li>2.0–3.99 → MED</li>
+                        <li>4.0–5.99 → HIGH</li>
+                        <li>≥ 6.0 → CRITICAL</li>
+                      </ul>
+                      <div className="previewHint">
+                        Thresholds are UI-level and can be tuned later without changing client payload.
                       </div>
-                      <div className="hint">แนะนำใช้ค่ามาตรฐาน (0.25/0.5/0.75/1.0) เพื่อความสม่ำเสมอ</div>
-                    </div>
-
-                    {/* CB */}
-                    <div className="field">
-                      <div className="label">CB — Circumstances of the Breach</div>
-                      <div className="rubricCards cbGrid">
-                        {CB_LEVELS.map((opt) => (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            className={`rubricCard ${cb === opt.value ? "active" : ""}`}
-                            onClick={() => setCb(opt.value)}
-                          >
-                            <div className="rubricTitle">{opt.title}</div>
-                            <div className="rubricSub">{opt.desc}</div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="hint">
-                      ✅ Client payload = <span className="mono">title, description, dpc, ei, cb</span> เท่านั้น (คะแนน severity คำนวณให้อัตโนมัติ)
                     </div>
                   </div>
                 </div>
 
-                {/* RIGHT: preview */}
+                {/* RIGHT */}
                 <div className="rmModalRight">
-                  <div className="previewCard">
-                    <div className="previewTitle">Severity Preview</div>
-
-                    <div className="previewFormula mono">
-                      Final Severity = (DPC × EI) + CB
-                    </div>
-
-                    <div className="previewScoreRow">
-                      <div className="previewScore mono">{finalSeverity.toFixed(2)}</div>
-                      <span className={`pill sev_${severityLevel}`}>{severityLevel}</span>
-                    </div>
-
-                    <div className="previewExplain">
-                      <div className="exRow">
-                        <div className="exKey">DPC</div>
-                        <div className="exVal mono">{dpc}</div>
+                  <div className="scoreCard scoreCardFixed">
+                    <div className="scoreHeaderRow">
+                      <div className="scoreTitle">Select DPC / EI / CB</div>
+                      <div className="tabRow" role="tablist" aria-label="Score tabs">
+                        <button
+                          type="button"
+                          className={`tabBtn ${scoreTab === "DPC" ? "active" : ""} ${(submitAttempted && !dpcOk) ? "tabError" : ""}`}
+                          onClick={() => setScoreTab("DPC")}
+                          role="tab"
+                          aria-selected={scoreTab === "DPC"}
+                        >
+                          DPC
+                        </button>
+                        <button
+                          type="button"
+                          className={`tabBtn ${scoreTab === "EI" ? "active" : ""} ${(submitAttempted && !eiOk) ? "tabError" : ""}`}
+                          onClick={() => setScoreTab("EI")}
+                          role="tab"
+                          aria-selected={scoreTab === "EI"}
+                        >
+                          EI
+                        </button>
+                        <button
+                          type="button"
+                          className={`tabBtn ${scoreTab === "CB" ? "active" : ""} ${(submitAttempted && !cbOk) ? "tabError" : ""}`}
+                          onClick={() => setScoreTab("CB")}
+                          role="tab"
+                          aria-selected={scoreTab === "CB"}
+                        >
+                          CB
+                        </button>
                       </div>
-                      <div className="exRow">
-                        <div className="exKey">EI</div>
-                        <div className="exVal mono">{Number(ei).toFixed(2)}</div>
-                      </div>
-                      <div className="exRow">
-                        <div className="exKey">CB</div>
-                        <div className="exVal mono">{cb}</div>
-                      </div>
                     </div>
 
-                    <div className="previewHint">
-                      ระบบจะเก็บค่า computed เพื่อ audit ได้ (final severity + level) แต่ user กรอกแค่ 5 ช่อง
+                    {/* meta (no "Selected" badge, no "DPC 2" pill) */}
+                    <div className="scoreMeta" role="tabpanel">
+                      {scoreTab === "DPC" && (
+                        <>
+                          <div className="label">DPC — Data Processing Context</div>
+                          <div className="defText">{RUBRIC_DEFS.dpc}</div>
+                        </>
+                      )}
+                      {scoreTab === "EI" && (
+                        <>
+                          <div className="label">EI — Ease of Identification</div>
+                          <div className="defText">{RUBRIC_DEFS.ei}</div>
+                        </>
+                      )}
+                      {scoreTab === "CB" && (
+                        <>
+                          <div className="label">CB — Circumstances of the Breach</div>
+                          <div className="defText">{RUBRIC_DEFS.cb}</div>
+                        </>
+                      )}
                     </div>
-                  </div>
 
-                  <div className="previewCard">
-                    <div className="previewTitle">Quick sanity checks</div>
-                    <ul className="previewBullets">
-                      <li>ถ้าเป็น “ชื่อ/ข้อมูลทั่วไป” → DPC มักอยู่ 1–2</li>
-                      <li>ถ้ามี “ข้อมูลใช้ทำ fraud ได้” → DPC มักสูง (3–4)</li>
-                      <li>ถ้าเกี่ยวกับ regulator/critical infra → CB ควรสูงขึ้น</li>
-                    </ul>
+                    {/* options (scroll ONLY here) */}
+                    <div className="scorePanel" aria-label="Scoring options">
+                      
+                      {scoreTab === "DPC" && showDpcErr && <div className="fieldError fieldErrorTight">Please select a DPC level.</div>}
+                      {scoreTab === "EI" && showEiErr && <div className="fieldError fieldErrorTight">Please select an EI value.</div>}
+                      {scoreTab === "CB" && showCbErr && <div className="fieldError fieldErrorTight">Please select a CB level.</div>}
+{scoreTab === "DPC" && (
+                        <div className="rubricPanelGrid">
+                          {DPC_LEVELS.map((opt) => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              className={`rubricCard rubricCardDense ${dpc === opt.value ? "active" : ""}`}
+                              onClick={() => { setDpc(opt.value); setTouched((t) => ({ ...t, dpc: true })); }}
+                            >
+                              <div className="rubricTitle">{opt.title}</div>
+                              <div className="rubricSub">{opt.summary}</div>
+                              <div className="rubricDetails rubricDetailsOpen">
+  <div className="rubricExamplesTitle">Examples</div>
+  <ul className="rubricList">
+    {opt.examples.map((ex, i) => <li key={i}>{ex}</li>)}
+  </ul>
+</div>
+
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {scoreTab === "EI" && (
+                        <>
+                          <div className="rubricRow rubricRowDense">
+                            {EI_PRESETS.map((opt) => (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                className={`chipBtn chipBtnDense ${Number(ei) === opt.value ? "active" : ""}`}
+                                onClick={() => { setEi(opt.value); setTouched((t) => ({ ...t, ei: true })); }}
+                              >
+                                <div className="chipTop">
+                                  <span className="mono">{opt.label}</span>
+                                  <span className="chipTag">{opt.title}</span>
+                                </div>
+                                <div className="chipDesc">{opt.desc}</div>
+                              </button>
+                            ))}
+                          </div>
+                          <div className="hint">แนะนำใช้ค่ามาตรฐาน (0.25/0.5/0.75/1.0) เพื่อความสม่ำเสมอ</div>
+                        </>
+                      )}
+
+                      {scoreTab === "CB" && (
+                        <>
+                          <div className="rubricCards cbGridDense">
+                            {CB_LEVELS.map((opt) => (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                className={`rubricCard rubricCardDense ${cb === opt.value ? "active" : ""}`}
+                                onClick={() => { setCb(opt.value); setTouched((t) => ({ ...t, cb: true })); }}
+                              >
+                                <div className="rubricTitle">{opt.title}</div>
+                                <div className="rubricSub">{opt.summary}</div>
+                              </button>
+                            ))}
+                          </div>
+                          <div className="hint">Tip: ถ้าเกี่ยวกับ financial sector / regulator / critical infra ให้เพิ่ม CB</div>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="modalFooter">
-              <button className="ghostBtn" onClick={() => setModal("NONE")}>Close</button>
-              <button className="primaryBtn" onClick={saveRule}>Save</button>
+              <button className="ghostBtn" onClick={() => setModal("NONE")}>
+                Close
+              </button>
+              <button className={`primaryBtn ${!formOk ? "btnDisabled" : ""}`} onClick={onSubmitRule} disabled={!formOk}>
+                Save
+              </button>
             </div>
           </div>
         </div>

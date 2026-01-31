@@ -7,7 +7,7 @@
 
   width: var(--sidebar-w);
   height: 100vh;
-  z-index: 1100;
+  z-index: var(--z-sidebar);
 
   background: var(--sidebar-bg);
   color: var(--sidebar-text);
@@ -19,6 +19,7 @@
   box-sizing: border-box;
 
   transition: width 180ms ease;
+  will-change: width;
 }
 
 .sidebarLogo{

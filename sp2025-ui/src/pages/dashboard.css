@@ -36,15 +36,14 @@
 }
 
 /* ✅ theme-safe card */
-.card {
+.dashRoot .card{
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 14px;
   color: var(--text);
 }
-
-.cardTitle {
+.dashRoot .cardTitle{
   font-weight: 800;
   margin-bottom: 10px;
 }
@@ -396,6 +395,13 @@
   gap: 10px;
 }
 
+/* "Search" button in Dashboard toolbar */
+.searchBtn{
+  height: 36px;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+
 .filterToggle.active{
   border-color: var(--border-2);
 }
@@ -456,4 +462,15 @@
     width: 100%;
   }
   .filterInput{ width: 100%; }
+}
+.tagWrap {
+  /* AI Tags: 1 pill per line */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+.tdNowrap {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }

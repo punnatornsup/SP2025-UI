@@ -27,6 +27,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
+  min-width: 0;
 }
 
 .topbarBrand{
@@ -34,6 +35,26 @@
   align-items: center;
   gap: 10px;
   min-width: 0;
+}
+
+.topbarTitle{
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: -0.2px;
+  color: var(--text);
+
+  /* prevent brand from pushing bell out */
+  max-width: 560px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 1180px){
+  .topbarTitle{ max-width: 380px; }
+}
+@media (max-width: 960px){
+  .topbarTitle{ max-width: 240px; }
 }
 
 .bellBtn{
@@ -47,7 +68,9 @@
   border: 1px solid var(--border-2);
   background: var(--control-bg);
   color: var(--control-text);
+  cursor: pointer;
 }
+.bellBtn:hover{ filter: brightness(1.02); }
 
 .miniLogo{
   width: 34px;

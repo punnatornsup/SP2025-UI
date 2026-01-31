@@ -45,6 +45,14 @@
   --btn-solid-text: #ffffff;
 
   --link: #3b82f6;
+
+  /* ===== Layer scale (FIX overlay bugs) =====
+     Rule: modal/popover must always be above topbar/sidebar */
+  --z-topbar: 1000;
+  --z-sidebar: 1100;
+  --z-modal: 2000;
+  --z-popover: 2500;
+  --z-toast: 3000;
 }
 
 /* ===== DARK (auto from system) ===== */
@@ -104,10 +112,15 @@ a{
 a:hover{ text-decoration: underline; }
 
 /* keep button baseline non-invasive */
-button{
-  font-family: inherit;
+button{ font-family: inherit; }
+
+/* Accessible focus (keyboard) */
+:where(button, a, input, textarea, select):focus-visible{
+  outline: 2px solid var(--border-2);
+  outline-offset: 2px;
 }
-/* ===== App controls: buttons + inputs (PUT AT END) ===== */
+
+/* ===== App controls: buttons + inputs (shared) ===== */
 
 /* Primary */
 .primaryBtn{
@@ -119,6 +132,7 @@ button{
   font-weight: 800;
   cursor: pointer;
 }
+.primaryBtn:hover{ filter: brightness(1.02); }
 
 /* Ghost */
 .ghostBtn{
@@ -130,6 +144,7 @@ button{
   font-weight: 800;
   cursor: pointer;
 }
+.ghostBtn:hover{ filter: brightness(1.02); }
 
 /* Danger (ใช้กับ Cancel job) */
 .dangerBtn{

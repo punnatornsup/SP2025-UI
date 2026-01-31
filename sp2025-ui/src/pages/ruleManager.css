@@ -1,36 +1,39 @@
-/* src/pages/ruleManager.css (REPLACE ALL) */
+/* src/pages/ruleManager.css (FULL REPLACE) */
 
-/* ---------- Page layout ---------- */
 .rmRoot{
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+               Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--text);
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
+
+.rmRoot .mono{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.rmRoot .muted{ color: var(--muted); }
+.rmRoot .bold{ font-weight: 800; }
 
 .rmHeader{
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-
 .rmTitle{
   margin: 0;
   font-size: 20px;
   font-weight: 900;
-  color: var(--text);
+  letter-spacing: -0.3px;
 }
 
-/* ---------- Cards (scoped) ---------- */
 .rmRoot .card{
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 14px;
-  color: var(--text);
 }
-
-.rmRoot .rmCard{ padding: 14px; }
-
 .rmRoot .cardHeaderRow{
   display:flex;
   align-items:center;
@@ -39,49 +42,60 @@
   margin-bottom: 12px;
   flex-wrap: wrap;
 }
-
 .rmRoot .cardTitle{
   font-weight: 900;
-  color: var(--text);
+  letter-spacing: -0.2px;
 }
 
-.rmRoot .muted{ color: var(--muted); }
-.rmRoot .bold{ font-weight: 900; }
-.rmRoot .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+/* Buttons */
+.rmRoot .primaryBtn,
+.rmRoot .ghostBtn{
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.rmRoot .primaryBtn{
+  border: 1px solid var(--border);
+  background: var(--btn-solid-bg);
+  color: var(--btn-solid-text);
+}
+.rmRoot .ghostBtn{
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
+  color: var(--control-text);
+}
+.rmRoot .primaryBtn:hover,
+.rmRoot .ghostBtn:hover{
+  filter: brightness(1.02);
+}
 
-/* ---------- Table ---------- */
+/* Table */
 .rmRoot .tableWrap{ width: 100%; overflow: auto; }
 .rmRoot .table{
   width: 100%;
   border-collapse: collapse;
-  min-width: 1050px; /* ให้ table ไม่ยุบจนดูแปลก */
+  min-width: 1050px;
 }
-
 .rmRoot .table thead th{
   text-align: left;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 900;
   padding: 12px 14px;
   background: var(--surface-2);
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
-
 .rmRoot .table tbody td{
   padding: 12px 14px;
   border-bottom: 1px solid var(--border);
-  font-size: 13px;
+  font-size: 14px;
   vertical-align: top;
 }
-
 .rmRoot .tdAction{ width: 1%; white-space: nowrap; }
+.rmRoot .emptyCell{ padding: 18px 14px; color: var(--muted); }
 
-.rmRoot .emptyCell{
-  padding: 18px 14px;
-  color: var(--muted);
-}
-
-/* ---------- Pills ---------- */
+/* Pills */
 .rmRoot .pill{
   display:inline-flex;
   align-items:center;
@@ -95,56 +109,30 @@
   font-size: 12px;
   white-space: nowrap;
 }
-
 .rmRoot .pill.sev_CRITICAL{ background: rgba(220, 0, 0, 0.10); border-color: rgba(220, 0, 0, 0.25); }
 .rmRoot .pill.sev_HIGH{     background: rgba(255, 140, 0, 0.12); border-color: rgba(255, 140, 0, 0.25); }
 .rmRoot .pill.sev_MED{      background: rgba(255, 200, 0, 0.14); border-color: rgba(255, 200, 0, 0.28); }
 .rmRoot .pill.sev_LOW{      background: rgba(0, 170, 255, 0.10); border-color: rgba(0, 170, 255, 0.22); }
 
-/* ถ้า severity ของคุณใช้ MED (ตาม code) */
-.rmRoot .pill.sev_MEDIUM{   background: rgba(255, 200, 0, 0.14); border-color: rgba(255, 200, 0, 0.28); }
-
-/* ---------- Buttons (scoped but still using your global tokens) ---------- */
-.rmRoot .primaryBtn{
-  border-radius: 12px;
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  background: var(--btn-solid-bg);
-  color: var(--btn-solid-text);
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.rmRoot .ghostBtn{
-  border-radius: 12px;
-  padding: 8px 12px;
-  border: 1px solid var(--control-border);
-  background: var(--control-bg);
-  color: var(--control-text);
-  font-weight: 900;
-  cursor: pointer;
-}
-
-/* ---------- Sensitivity (Gamma) ---------- */
+/* Sensitivity */
 .rmRoot .gammaBox{ display:flex; flex-direction:column; gap: 10px; }
 .rmRoot .gammaRow{ display:flex; align-items:center; gap: 12px; }
-.rmRoot .gammaLabel{ font-weight: 900; color: var(--text); }
-/* Gamma slider: balanced width (not too short, not too long) */
-.rmRoot .gammaSlider{
-  width: min(420px, 65vw);
-}
-
+.rmRoot .gammaLabel{ font-weight: 900; }
+.rmRoot .gammaSlider{ width: min(420px, 65vw); }
 .rmRoot .gammaScale{
   display: flex;
   justify-content: space-between;
   width: min(420px, 65vw);
   color: var(--muted);
 }
+.rmRoot .hint{
+  font-size: 14px;
+  color: var(--muted);
+  padding: 6px;
+  line-height: 1.45;
+}
 
-
-.rmRoot .hint{ font-size: 12px; color: var(--muted); line-height: 1.4; }
-
-/* ---------- Modal (scoped) ---------- */
+/* Modal */
 .rmRoot .modalOverlay{
   position: fixed;
   inset: 0;
@@ -153,12 +141,12 @@
   align-items: center;
   justify-content: center;
   padding: 18px;
-  z-index: 999;
+  z-index: var(--z-modal);
+  overscroll-behavior: contain;
 }
-
 .rmRoot .modalShell{
-  width: min(1200px, 100%);
-  height: min(760px, 100%);
+  width: min(1320px, 100%);
+  height: min(86vh, 820px);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 18px;
@@ -166,9 +154,9 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
 }
-
 .rmRoot .modalHeader{
   height: 56px;
   padding: 0 14px;
@@ -177,9 +165,11 @@
   align-items: center;
   justify-content: space-between;
 }
-
-.rmRoot .modalTitle{ font-weight: 900; }
-
+.rmRoot .modalTitle{
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: -0.2px;
+}
 .rmRoot .closeBtn{
   width: 38px;
   height: 38px;
@@ -189,14 +179,14 @@
   color: var(--control-text);
   cursor: pointer;
 }
-
 .rmRoot .modalBody{
   flex: 1;
-  padding: 14px;
+  padding: 16px;
   min-height: 0;
-  overflow: auto;
+  overflow: hidden;
+  scrollbar-gutter: stable both-edges;
+  display: flex; /* allow rmModalGrid to stretch so inner panels can scroll */
 }
-
 .rmRoot .modalFooter{
   padding: 12px 14px;
   border-top: 1px solid var(--border);
@@ -205,17 +195,43 @@
   gap: 10px;
 }
 
-/* ---------- Form styles ---------- */
-.rmRoot .formGrid{ display:flex; flex-direction:column; gap: 12px; }
+/* Modal grid — KEY FIX: stretch so scorePanel can scroll */
+.rmRoot .rmModalGrid{
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  /* หรือ 0.8fr / 1.2fr ถ้าจะให้ขวาเด่นขึ้นอีก */
+  gap: 18px;
+  align-items: stretch;
+  height: 100%;
+}
 
+.rmRoot .rmModalLeft,
+.rmRoot .rmModalRight{
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.rmRoot .rmModalLeft{
+  overflow: auto;
+  padding-right: 6px;
+  scrollbar-gutter: stable;
+}
+.rmRoot .rmModalRight{
+  position: static;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Form controls */
+.rmRoot .formGrid{ display:flex; flex-direction:column; gap: 14px; }
 .rmRoot .field{ display:flex; flex-direction:column; gap: 6px; }
-
 .rmRoot .label{
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 900;
   color: var(--muted);
 }
-
 .rmRoot .input{
   width: 100%;
   height: 40px;
@@ -228,10 +244,9 @@
   box-sizing: border-box;
   font: inherit;
 }
-
 .rmRoot .textarea{
   width: 100%;
-  min-height: 120px;          /* ✅ แก้ textarea เตี้ย */
+  min-height: 120px;
   padding: 10px 12px;
   border-radius: 12px;
   border: 1px solid var(--control-border);
@@ -240,107 +255,11 @@
   outline: none;
   box-sizing: border-box;
   font: inherit;
-  resize: vertical;
+  resize: none;
 }
+.rmRoot .textareaCompact{ height: 140px; }
 
-/* ---------- Modal grid ---------- */
-.rmRoot .rmModalGrid{
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 14px;
-  align-items: start;
-}
-
-@media (max-width: 980px){
-  .rmRoot .rmModalGrid{ grid-template-columns: 1fr; }
-}
-
-/* ---------- Rubric cards ---------- */
-.rmRoot .rubricCards{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.rmRoot .cbGrid{
-  grid-template-columns: 1fr 1fr;
-}
-
-@media (max-width: 720px){
-  .rmRoot .rubricCards{ grid-template-columns: 1fr; }
-  .rmRoot .cbGrid{ grid-template-columns: 1fr; }
-}
-
-.rmRoot .rubricCard{
-  text-align: left;
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid var(--control-border);
-  background: var(--control-bg);
-  color: var(--control-text);
-  cursor: pointer;
-}
-
-.rmRoot .rubricCard.active{
-  border-color: var(--border-2);
-  background: var(--surface-2);
-}
-
-.rmRoot .rubricTitle{
-  font-weight: 900;
-  font-size: 12px;
-  margin-bottom: 6px;
-}
-
-.rmRoot .rubricSub{
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.rmRoot .rubricList{
-  margin: 6px 0 0 16px;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-/* ---------- EI chip buttons ---------- */
-.rmRoot .rubricRow{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-}
-
-@media (max-width: 980px){
-  .rmRoot .rubricRow{ grid-template-columns: 1fr 1fr; }
-}
-@media (max-width: 520px){
-  .rmRoot .rubricRow{ grid-template-columns: 1fr; }
-}
-
-.rmRoot .chipBtn{
-  text-align: left;
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid var(--control-border);
-  background: var(--control-bg);
-  color: var(--control-text);
-  cursor: pointer;
-}
-
-.rmRoot .chipBtn.active{
-  border-color: var(--border-2);
-  background: var(--surface-2);
-}
-
-.rmRoot .chipDesc{
-  margin-top: 6px;
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.35;
-}
-
-/* ---------- Preview cards (right side) ---------- */
+/* Preview cards (left) */
 .rmRoot .previewCard{
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -349,34 +268,34 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  position: static;
 }
-
-.rmRoot .previewTitle{ font-weight: 900; }
-
+.rmRoot .previewTitle{
+  font-weight: 900;
+  font-size: 14px;
+  /* letter-spacing: -0.2px; */
+}
 .rmRoot .previewFormula{
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
 }
-
 .rmRoot .previewScoreRow{
   display:flex;
   align-items:center;
   justify-content: space-between;
   gap: 10px;
 }
-
 .rmRoot .previewScore{
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 900;
+  letter-spacing: -0.6px;
   color: var(--text);
 }
-
 .rmRoot .previewExplain{
   display:flex;
   flex-direction: column;
   gap: 8px;
 }
-
 .rmRoot .exRow{
   display:flex;
   align-items:center;
@@ -387,20 +306,251 @@
   border: 1px solid var(--border);
   background: var(--surface);
 }
-
-.rmRoot .exKey{ font-weight: 900; color: var(--muted); font-size: 12px; }
+.rmRoot .exKey{ font-weight: 900; color: var(--muted); font-size: 14px; }
 .rmRoot .exVal{ font-weight: 900; }
-
 .rmRoot .previewBullets{
   margin: 0;
   padding-left: 16px;
   color: var(--muted);
-  font-size: 12px;
-  line-height: 1.4;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.rmRoot .previewHint{
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.45;
 }
 
-.rmRoot .previewHint{
+/* How-to */
+.rmRoot .howtoBox{
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rmRoot .howtoTitle{
+  font-weight: 900;
+  font-size: 14px;
+  color: var(--text);
+  letter-spacing: -0.1px;
+}
+
+/* Scoring card (right) */
+.rmRoot .scoreCard{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.rmRoot .scoreCardFixed{
+  flex: 1;
+  min-height: 0;
+}
+.rmRoot .scoreHeaderRow{
+  display:flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.rmRoot .scoreTitle{
+  font-weight: 900;
+  letter-spacing: -0.2px;
+}
+
+/* Tabs */
+.rmRoot .tabRow{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
+  border-radius: 999px;
+}
+.rmRoot .tabBtn{
+  border: 0;
+  background: transparent;
+  color: var(--control-text);
+  font-weight: 900;
+  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.rmRoot .tabBtn.active{
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.rmRoot .scoreMeta{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rmRoot .scoreSecHead{
+  display:flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.rmRoot .defText{
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+  margin-top: 4px;
+}
+
+/* Selected summary (no badge) */
+.rmRoot .rubricSelectedRow{
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  border-left: 4px solid var(--border-2);
+}
+.rmRoot .rubricSelectedText{ min-width: 0; }
+
+/* Scroll options ONLY here */
+.rmRoot .scorePanel{
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 0;
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
+}
+
+/* DPC grid */
+.rmRoot .rubricPanelGrid{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+.rmRoot .cbGridDense{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+/* Cards */
+.rmRoot .rubricCard{
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
+  color: var(--control-text);
+  cursor: pointer;
+  width: 100%; /* remove right empty space; cards fill the panel */
+  display: block;
+}
+.rmRoot .rubricCard:hover{ filter: brightness(1.02); }
+.rmRoot .rubricCard.active{
+  border-color: var(--border-2);
+  background: var(--surface-2);
+}
+/* ✅ cut empty space */
+.rmRoot .rubricCardDense{
+  min-height: 0;
+  width: 100%;
+}
+
+.rmRoot .rubricTitle{
+  font-weight: 900;
+  font-size: 14px;
+  margin-bottom: 6px;
+  letter-spacing: -0.1px;
+}
+.rmRoot .rubricSub{
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+/* details */
+.rmRoot .rubricDetails{
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+.rmRoot .rubricSummary{
+  cursor: pointer;
+  font-weight: 900;
+  font-size: 14px;
+  color: var(--muted);
+  list-style: none;
+}
+.rmRoot .rubricSummary::-webkit-details-marker{ display:none; }
+.rmRoot .rubricSummary::before{
+  content: "▸";
+  display: inline-block;
+  margin-right: 6px;
+  transform: translateY(-1px);
+}
+.rmRoot details[open] > .rubricSummary::before{ content: "▾"; }
+
+.rmRoot .rubricList{
+  margin: 6px 0 0 16px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+/* EI chips */
+.rmRoot .rubricRow{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.rmRoot .chipBtn{
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
+  color: var(--control-text);
+  cursor: pointer;
+  width: 100%;
+  display: block;
+}
+.rmRoot .chipBtn:hover{ filter: brightness(1.02); }
+.rmRoot .chipBtn.active{
+  border-color: var(--border-2);
+  background: var(--surface-2);
+}
+.rmRoot .chipBtnDense{ min-height: 92px; }
+.rmRoot .chipTop{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.rmRoot .chipTag{
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--text);
+  white-space: nowrap;
+}
+.rmRoot .chipDesc{
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.rmRoot .rubricDetailsOpen{
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+.rmRoot .rubricExamplesTitle{
+  font-weight: 900;
   font-size: 12px;
   color: var(--muted);
-  line-height: 1.4;
+  margin-bottom: 6px;
 }

@@ -25,6 +25,18 @@ export async function updateRule(_: { id: string; payload: RuleInputDTO }) {
   return api<ActiveKeywordRuleDTO>("/rules/active-keywords", { method: "PUT" });
 }
 
-export async function updateGamma(_: { gamma: number }) {
-  return api<SensitivityDTO>("/rules/sensitivity", { method: "PUT" });
+export async function updateGamma(_: { gamma: number }): Promise<SensitivityDTO> {
+  if (USE_MOCK) {
+    const now = new Date().toISOString();
+    // also update in-memory mock so UI reflects "Last saved"
+    mockSensitivity.gamma = _.gamma;
+    mockSensitivity.updated_at = now;
+    return { gamma: _.gamma, updated_at: now };
+  }
+
+  return api<SensitivityDTO>("/rules/sensitivity", {
+    method: "PUT",
+    body: JSON.stringify({ gamma: _.gamma }),
+    headers: { "Content-Type": "application/json" },
+  });
 }

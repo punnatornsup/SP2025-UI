@@ -1,0 +1,46 @@
+/* Shared form tokens (Level 2 - unified across pages)
+   - req: required marker (*)
+   - inputInvalid: invalid input highlight
+   - fieldError: error message text
+   - fieldErrorTight: tighter spacing variant (used in Rule Manager tabs)
+   - formErrorBanner: optional top banner for form-wide errors
+   - btnDisabled: optional disabled-look helper (in addition to disabled attr)
+*/
+
+.req{
+  color: rgba(220, 38, 38, 0.95);
+  margin-left: 4px;
+  font-weight: 800;
+}
+
+.inputInvalid{
+  border-color: rgba(220, 38, 38, 0.45) !important;
+  background: rgba(220, 38, 38, 0.06) !important;
+}
+
+.fieldError{
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(185, 28, 28, 0.95);
+  line-height: 1.25;
+}
+
+.fieldErrorTight{
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.formErrorBanner{
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  background: rgba(220, 38, 38, 0.07);
+  color: var(--text, #fff);
+  font-size: 12px;
+}
+
+.btnDisabled{
+  opacity: 0.55;
+  cursor: not-allowed;
+}

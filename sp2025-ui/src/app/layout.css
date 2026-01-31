@@ -28,7 +28,7 @@
   left: var(--sidebar-w);
   right: 0;
   height: var(--topbar-h);
-  z-index: 1000;
+  z-index: var(--z-topbar);
 
   background: var(--surface);
   border-bottom: 1px solid var(--border);
@@ -46,7 +46,7 @@
   margin: 0 auto;
 }
 
-/* responsive padding */
+/* responsive padding (mobile fallback; desktop-first app) */
 @media (max-width: 640px){
   :root{ --page-pad: 14px; }
 }

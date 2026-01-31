@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import "./formTokens.css";
 import "./crawlerManager.css";
 
 import {
@@ -51,6 +52,14 @@ export default function CrawlerManagerPage() {
   const [pAlertTo, setPAlertTo] = useState("");
   const [pBypass, setPBypass] = useState(false);
   const [pCookies, setPCookies] = useState<CookieKV[]>([{ name: "", value: "" }]);
+  // ===== validation visibility (consistent with Rule Manager) =====
+  // Show field errors only after user "touches" the field (blur) or after pressing Save (submitAttempted).
+  const [crawlerSubmitAttempted, setCrawlerSubmitAttempted] = useState(false);
+  const [crawlerTouched, setCrawlerTouched] = useState<Record<string, boolean>>({});
+
+  const [scheduleSubmitAttempted, setScheduleSubmitAttempted] = useState(false);
+  const [scheduleTouched, setScheduleTouched] = useState<Record<string, boolean>>({});
+
 
   // ===== form states (Schedule) =====
   const [sName, setSName] = useState("");
@@ -92,7 +101,82 @@ export default function CrawlerManagerPage() {
     return sum;
   }, [workerRows]);
 
+  // ===== validation (UX) =====
+  // Requirement:
+  // - Add crawler: required all fields EXCEPT Description
+  // - Cookies: every visible row must be filled (name + value). Must fill the 1st row before adding more.
+  // - Add schedule: required Name
+  const crawlerValidation = useMemo(() => {
+    const errors: Record<string, string> = {};
+
+    const name = pName.trim();
+    const domains = normalizeDomains(pDomains);
+    const startUrl = pStartUrl.trim();
+    const alertTo = pAlertTo.trim();
+
+    // Cookies: all rows must be complete (no partial)
+    const cookieRows = (pCookies ?? []).map((r) => ({
+      name: (r.name ?? "").trim(),
+      value: (r.value ?? "").trim(),
+    }));
+    const anyCookieRowEmpty = cookieRows.some((r) => r.name.length === 0 || r.value.length === 0);
+    const cookieCount = cookieRows.length;
+
+    if (!name) errors.pName = "Name is required";
+    if (domains.length === 0) errors.pDomains = "Allow domain is required";
+    if (!startUrl) errors.pStartUrl = "Start url is required";
+    if (!alertTo) errors.pAlertTo = "To alert email is required";
+    if (cookieCount === 0 || anyCookieRowEmpty) errors.pCookies = "Cookies: every row must have name and value";
+
+    return {
+      errors,
+      canSave: Object.keys(errors).length === 0,
+      canAddCookieRow: cookieCount > 0 && !anyCookieRowEmpty,
+    };
+  }, [pName, pDomains, pStartUrl, pAlertTo, pCookies]);
+
+  const scheduleValidation = useMemo(() => {
+    const errors: Record<string, string> = {};
+
+    const name = sName.trim();
+    if (!name) errors.sName = "Name is required";
+
+    // extra safety: required mapped crawler id
+    if (!sCrawlerId) errors.sCrawlerId = "Crawler is required";
+
+    if (sMode === "INTERVAL") {
+      if (!Number.isFinite(sEvery) || Math.floor(sEvery) < 1) errors.sEvery = "Every must be >= 1";
+      if (!sPeriod) errors.sPeriod = "Period is required";
+    }
+
+    if (sMode === "CLOCKED") {
+      if (!clockLocal) errors.clockLocal = "Clocked time is required";
+    }
+
+    return {
+      errors,
+      canSave: Object.keys(errors).length === 0,
+    };
+  }, [sName, sCrawlerId, sMode, sEvery, sPeriod, clockLocal]);
+
   // ===== helpers =====
+
+  function markCrawlerTouched(key: string) {
+    setCrawlerTouched((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
+  }
+
+  function markScheduleTouched(key: string) {
+    setScheduleTouched((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
+  }
+
+  function showCrawlerError(key: string) {
+    return crawlerSubmitAttempted || !!crawlerTouched[key];
+  }
+
+  function showScheduleError(key: string) {
+    return scheduleSubmitAttempted || !!scheduleTouched[key];
+  }
+
   function normalizeDomains(raw: string) {
     return raw
       .split(",")
@@ -128,6 +212,8 @@ export default function CrawlerManagerPage() {
     setPAlertTo("");
     setPBypass(false);
     setPCookies([{ name: "", value: "" }]);
+    setCrawlerSubmitAttempted(false);
+    setCrawlerTouched({});
     setModal("ADD_CRAWLER");
   }
 
@@ -140,21 +226,26 @@ export default function CrawlerManagerPage() {
     setPAlertTo(row.alert_to);
     setPBypass(row.bypass_ddos);
     setPCookies(row.cookies?.length ? row.cookies : [{ name: "", value: "" }]);
+    setCrawlerSubmitAttempted(false);
+    setCrawlerTouched({});
     setModal("EDIT_CRAWLER");
   }
 
   function saveCrawler() {
+    setCrawlerSubmitAttempted(true);
+    // UX: prevent save if invalid (button should already be disabled)
+    if (!crawlerValidation.canSave) return;
     const domains = normalizeDomains(pDomains);
     const cookies = normalizeCookies(pCookies);
 
     if (modal === "ADD_CRAWLER") {
       const newRow: CrawlerProfileDTO = {
         id: genUUIDLike(),
-        name: pName || "Untitled crawler",
-        description: pDesc || "-",
+        name: pName.trim(),
+        description: pDesc.trim() || "-",
         allow_domains: domains,
-        start_url: pStartUrl || "-",
-        alert_to: pAlertTo || "-",
+        start_url: pStartUrl.trim(),
+        alert_to: pAlertTo.trim(),
         bypass_ddos: pBypass,
         cookies,
       };
@@ -167,11 +258,11 @@ export default function CrawlerManagerPage() {
           r.id === activeProfile.id
             ? {
                 ...r,
-                name: pName || r.name,
-                description: pDesc || r.description,
+                name: pName.trim(),
+                description: pDesc.trim() || "-",
                 allow_domains: domains,
-                start_url: pStartUrl || r.start_url,
-                alert_to: pAlertTo || r.alert_to,
+                start_url: pStartUrl.trim(),
+                alert_to: pAlertTo.trim(),
                 bypass_ddos: pBypass,
                 cookies,
               }
@@ -184,6 +275,8 @@ export default function CrawlerManagerPage() {
   }
 
   function addCookieRow() {
+    // UX: must fill current (first/previous) row(s) before adding a new one
+    if (!crawlerValidation.canAddCookieRow) return;
     setPCookies((prev) => [...prev, { name: "", value: "" }]);
   }
 
@@ -216,6 +309,8 @@ export default function CrawlerManagerPage() {
     setCMoy("*");
 
     setClockLocal("");
+    setScheduleSubmitAttempted(false);
+    setScheduleTouched({});
     setModal("ADD_SCHEDULE");
   }
 
@@ -240,12 +335,17 @@ export default function CrawlerManagerPage() {
     // Clocked
     setClockLocal(fromBangkokISO(row.clocked?.clocked_time ?? ""));
 
+    setScheduleSubmitAttempted(false);
+    setScheduleTouched({});
     setModal("EDIT_SCHEDULE");
   }
 
   function saveSchedule() {
+    setScheduleSubmitAttempted(true);
+    // UX: prevent save if invalid (button should already be disabled)
+    if (!scheduleValidation.canSave) return;
     const base = {
-      name: sName || "Untitled schedule",
+      name: sName,
       crawler_id: sCrawlerId,
       enabled: sEnabled,
       schedule_mode: sMode as ScheduleJobDTO["schedule_mode"],
@@ -271,7 +371,7 @@ export default function CrawlerManagerPage() {
             clocked: undefined,
           }
         : {
-            clocked: { clocked_time: toBangkokISO(clockLocal) || "2025-12-15T09:30:00+07:00" },
+            clocked: { clocked_time: toBangkokISO(clockLocal) },
             interval: undefined,
             crontab: undefined,
           };
@@ -587,8 +687,18 @@ export default function CrawlerManagerPage() {
               {(modal === "ADD_CRAWLER" || modal === "EDIT_CRAWLER") && (
                 <div className="formGrid">
                   <label className="field">
-                    <div className="label">Name</div>
-                    <input className="input" value={pName} onChange={(e) => setPName(e.target.value)} />
+                    <div className="label">
+                      Name<span className="req">*</span>
+                    </div>
+                    <input
+                      className={`input ${showCrawlerError("pName") && crawlerValidation.errors.pName ? "inputInvalid" : ""}`}
+                      value={pName}
+                      onChange={(e) => setPName(e.target.value)}
+                      onBlur={() => markCrawlerTouched("pName")}
+                    />
+                    {showCrawlerError("pName") && crawlerValidation.errors.pName && (
+                      <div className="fieldError">{crawlerValidation.errors.pName}</div>
+                    )}
                   </label>
 
                   <label className="field">
@@ -597,46 +707,76 @@ export default function CrawlerManagerPage() {
                   </label>
 
                   <label className="field">
-                    <div className="label">Allow domain (comma-separated)</div>
-                    <input className="input" value={pDomains} onChange={(e) => setPDomains(e.target.value)} />
+                    <div className="label">
+                      Allow domain (comma-separated)<span className="req">*</span>
+                    </div>
+                    <input
+                      className={`input ${showCrawlerError("pDomains") && crawlerValidation.errors.pDomains ? "inputInvalid" : ""}`}
+                      value={pDomains}
+                      onChange={(e) => setPDomains(e.target.value)}
+                      onBlur={() => markCrawlerTouched("pDomains")}
+                    />
+                    {showCrawlerError("pDomains") && crawlerValidation.errors.pDomains && (
+                      <div className="fieldError">{crawlerValidation.errors.pDomains}</div>
+                    )}
                   </label>
 
                   <label className="field">
-                    <div className="label">Start url</div>
+                    <div className="label">
+                      Start url<span className="req">*</span>
+                    </div>
                     <input
-                      className="input"
+                      className={`input ${showCrawlerError("pStartUrl") && crawlerValidation.errors.pStartUrl ? "inputInvalid" : ""}`}
                       value={pStartUrl}
                       onChange={(e) => setPStartUrl(e.target.value)}
+                      onBlur={() => markCrawlerTouched("pStartUrl")}
                       placeholder="https://..."
                     />
+                    {showCrawlerError("pStartUrl") && crawlerValidation.errors.pStartUrl && (
+                      <div className="fieldError">{crawlerValidation.errors.pStartUrl}</div>
+                    )}
                   </label>
 
                   <label className="field">
-                    <div className="label">To alert email</div>
+                    <div className="label">
+                      To alert email<span className="req">*</span>
+                    </div>
                     <input
-                      className="input"
+                      className={`input ${showCrawlerError("pAlertTo") && crawlerValidation.errors.pAlertTo ? "inputInvalid" : ""}`}
                       value={pAlertTo}
                       onChange={(e) => setPAlertTo(e.target.value)}
+                      onBlur={() => markCrawlerTouched("pAlertTo")}
                       placeholder="name@org.com"
                     />
+                    {showCrawlerError("pAlertTo") && crawlerValidation.errors.pAlertTo && (
+                      <div className="fieldError">{crawlerValidation.errors.pAlertTo}</div>
+                    )}
                   </label>
 
                   <div className="field">
-                    <div className="label">Cookies (Cookie_name, value)</div>
+                    <div className="label">
+                      Cookies (Cookie_name, value)<span className="req">*</span>
+                    </div>
 
                     <div className="cookieList">
-                      {pCookies.map((c, idx) => (
+                      {pCookies.map((c, idx) => {
+                        const nameMissing = (c.name ?? "").trim().length === 0;
+                        const valueMissing = (c.value ?? "").trim().length === 0;
+                        const rowInvalid = nameMissing || valueMissing;
+                        return (
                         <div className="cookieRow" key={idx}>
                           <input
-                            className="input"
+                            className={`input ${showCrawlerError("pCookies") && rowInvalid && nameMissing ? "inputInvalid" : ""}`}
                             value={c.name}
                             onChange={(e) => updateCookieRow(idx, { name: e.target.value })}
+                            onBlur={() => markCrawlerTouched("pCookies")}
                             placeholder="Cookie_name"
                           />
                           <input
-                            className="input"
+                            className={`input ${showCrawlerError("pCookies") && rowInvalid && valueMissing ? "inputInvalid" : ""}`}
                             value={c.value}
                             onChange={(e) => updateCookieRow(idx, { value: e.target.value })}
+                            onBlur={() => markCrawlerTouched("pCookies")}
                             placeholder="value"
                           />
 
@@ -644,18 +784,34 @@ export default function CrawlerManagerPage() {
                             className="ghostBtn"
                             onClick={() => removeCookieRow(idx)}
                             title="Remove cookie row"
+                            disabled={pCookies.length === 1}
                           >
                             Remove
                           </button>
                         </div>
-                      ))}
+                      );
+                      })}
                     </div>
 
-                    <button className="ghostBtn" onClick={addCookieRow}>
+                    <button
+                      className="ghostBtn"
+                      onClick={addCookieRow}
+                      disabled={!crawlerValidation.canAddCookieRow}
+                      title={
+                        crawlerValidation.canAddCookieRow
+                          ? "Add new cookie row"
+                          : "Fill current cookie row (name + value) before adding a new one"
+                      }
+                    >
                       + Add cookie row
                     </button>
 
-                    <div className="hint">(ระบบจะเก็บเฉพาะแถวที่ name/value ไม่ว่างทั้งคู่)</div>
+                    {showCrawlerError("pCookies") && crawlerValidation.errors.pCookies && (
+                      <div className="fieldError">{crawlerValidation.errors.pCookies}</div>
+                    )}
+                    <div className="hint">
+                      ต้องกรอกครบทุกแถว (name + value) และต้องกรอกแถวแรกให้ครบก่อนถึงจะเพิ่มแถวใหม่ได้
+                    </div>
                   </div>
 
                   <div className="field">
@@ -675,8 +831,18 @@ export default function CrawlerManagerPage() {
               {(modal === "ADD_SCHEDULE" || modal === "EDIT_SCHEDULE") && (
                 <div className="formGrid">
                   <label className="field">
-                    <div className="label">Name</div>
-                    <input className="input" value={sName} onChange={(e) => setSName(e.target.value)} />
+                    <div className="label">
+                      Name<span className="req">*</span>
+                    </div>
+                    <input
+                      className={`input ${showScheduleError("sName") && scheduleValidation.errors.sName ? "inputInvalid" : ""}`}
+                      value={sName}
+                      onChange={(e) => setSName(e.target.value)}
+                      onBlur={() => markScheduleTouched("sName")}
+                    />
+                    {showScheduleError("sName") && scheduleValidation.errors.sName && (
+                      <div className="fieldError">{scheduleValidation.errors.sName}</div>
+                    )}
                   </label>
 
                   <div className="fieldRow">
@@ -687,14 +853,22 @@ export default function CrawlerManagerPage() {
                   </div>
 
                   <label className="field">
-                    <div className="label">Crawler (map scheduler → crawler)</div>
-                    <select className="input" value={sCrawlerId} onChange={(e) => setSCrawlerId(e.target.value)}>
+                    <div className="label">Crawler (map scheduler → crawler)<span className="req">*</span></div>
+                    <select
+                      className={`input ${showScheduleError("sCrawlerId") && scheduleValidation.errors.sCrawlerId ? "inputInvalid" : ""}`}
+                      value={sCrawlerId}
+                      onChange={(e) => setSCrawlerId(e.target.value)}
+                      onBlur={() => markScheduleTouched("sCrawlerId")}
+                    >
                       {crawlerIdOptions.map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.name} — {c.id}
                         </option>
                       ))}
                     </select>
+                    {showScheduleError("sCrawlerId") && scheduleValidation.errors.sCrawlerId && (
+                      <div className="fieldError">{scheduleValidation.errors.sCrawlerId}</div>
+                    )}
                     <div className="hint">เลือก crawler ที่มีอยู่ในระบบเพื่อ mapped กับ scheduler</div>
                   </label>
 
@@ -717,23 +891,35 @@ export default function CrawlerManagerPage() {
                         <label className="field">
                           <div className="label small">every</div>
                           <input
-                            className="input"
+                            className={`input ${showScheduleError("sEvery") && scheduleValidation.errors.sEvery ? "inputInvalid" : ""}`}
                             type="number"
                             min={1}
                             step={1}
                             value={sEvery}
                             onChange={(e) => setSEvery(Number(e.target.value || 1))}
+                            onBlur={() => markScheduleTouched("sEvery")}
                           />
+                          {showScheduleError("sEvery") && scheduleValidation.errors.sEvery && (
+                            <div className="fieldError">{scheduleValidation.errors.sEvery}</div>
+                          )}
                         </label>
 
                         <label className="field">
                           <div className="label small">period</div>
-                          <select className="input" value={sPeriod} onChange={(e) => setSPeriod(e.target.value as any)}>
+                          <select
+                            className={`input ${showScheduleError("sPeriod") && scheduleValidation.errors.sPeriod ? "inputInvalid" : ""}`}
+                            value={sPeriod}
+                            onChange={(e) => setSPeriod(e.target.value as any)}
+                            onBlur={() => markScheduleTouched("sPeriod")}
+                          >
                             <option value="seconds">seconds</option>
                             <option value="minutes">minutes</option>
                             <option value="hours">hours</option>
                             <option value="days">days</option>
                           </select>
+                          {showScheduleError("sPeriod") && scheduleValidation.errors.sPeriod && (
+                            <div className="fieldError">{scheduleValidation.errors.sPeriod}</div>
+                          )}
                         </label>
                       </div>
 
@@ -788,11 +974,15 @@ export default function CrawlerManagerPage() {
                       <label className="field">
                         <div className="label small">clocked_time (Bangkok +07:00)</div>
                         <input
-                          className="input"
+                          className={`input ${showScheduleError("clockLocal") && scheduleValidation.errors.clockLocal ? "inputInvalid" : ""}`}
                           type="datetime-local"
                           value={clockLocal}
                           onChange={(e) => setClockLocal(e.target.value)}
+                          onBlur={() => markScheduleTouched("clockLocal")}
                         />
+                        {showScheduleError("clockLocal") && scheduleValidation.errors.clockLocal && (
+                          <div className="fieldError">{scheduleValidation.errors.clockLocal}</div>
+                        )}
                       </label>
 
                       <div className="hint">
@@ -822,13 +1012,23 @@ export default function CrawlerManagerPage() {
               </button>
 
               {(modal === "ADD_CRAWLER" || modal === "EDIT_CRAWLER") && (
-                <button className="primaryBtn" onClick={saveCrawler}>
+                <button
+                  className="primaryBtn"
+                  onClick={saveCrawler}
+                  disabled={!crawlerValidation.canSave}
+                  title={!crawlerValidation.canSave ? "Fill required fields to enable Save" : "Save crawler"}
+                >
                   Save
                 </button>
               )}
 
               {(modal === "ADD_SCHEDULE" || modal === "EDIT_SCHEDULE") && (
-                <button className="primaryBtn" onClick={saveSchedule}>
+                <button
+                  className="primaryBtn"
+                  onClick={saveSchedule}
+                  disabled={!scheduleValidation.canSave}
+                  title={!scheduleValidation.canSave ? "Fill required fields to enable Save" : "Save schedule"}
+                >
                   Save
                 </button>
               )}
