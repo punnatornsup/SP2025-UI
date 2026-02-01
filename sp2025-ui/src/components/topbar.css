@@ -59,11 +59,11 @@
 
 .bellBtn{
   width: 44px;
-  height: 36px;
+  height: var(--control-h-compact);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: var(--r-sm);
 
   border: 1px solid var(--border-2);
   background: var(--control-bg);
@@ -75,7 +75,7 @@
 .miniLogo{
   width: 34px;
   height: 34px;
-  border-radius: 10px;
+  border-radius: var(--r-sm);
   object-fit: contain;
   background: var(--surface-3);
   padding: 4px;

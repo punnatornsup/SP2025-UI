@@ -164,3 +164,10 @@
   .cmRoot .schedule2col { grid-template-columns: 1fr; }
   .cmRoot .cronGrid { grid-template-columns: 1fr; }
 }
+
+
+/* Save button soft warn (clickable but indicates missing fields) */
+.cmRoot .btnSoftWarn{
+  border-color: rgba(255, 140, 0, 0.45);
+  box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.12);
+}

@@ -47,6 +47,12 @@
   letter-spacing: -0.2px;
 }
 
+.rmRoot .rmHeaderActions{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 /* Buttons */
 .rmRoot .primaryBtn,
 .rmRoot .ghostBtn{
@@ -68,6 +74,28 @@
 .rmRoot .primaryBtn:hover,
 .rmRoot .ghostBtn:hover{
   filter: brightness(1.02);
+}
+
+/* Save button soft warn (clickable but indicates missing fields) */
+.rmRoot .btnSoftWarn{
+  border-color: rgba(255, 140, 0, 0.45);
+  box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.12);
+}
+
+/* selection tick */
+.rmRoot .selTick{
+  margin-left: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
+  color: green;
+  font-weight: 900;
+  font-size: 14px;
 }
 
 /* Table */
@@ -187,6 +215,70 @@
   scrollbar-gutter: stable both-edges;
   display: flex; /* allow rmModalGrid to stretch so inner panels can scroll */
 }
+
+.rmRoot .modalTopError{
+  margin-bottom: 10px;
+}
+
+/* Guide modal */
+.rmRoot .guideBody{
+  overflow: auto;
+  display: block;
+}
+.rmRoot .guideWrap{
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.rmRoot .guideLead{
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-2);
+}
+.rmRoot .guideFormula{
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
+}
+.rmRoot .guideSection{
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.rmRoot .guideH{
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+.rmRoot .guideList{
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rmRoot .guideGrid{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.rmRoot .guideCard{
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
+  border-radius: 14px;
+  padding: 12px;
+}
+.rmRoot .guideK{ font-weight: 900; margin-bottom: 6px; }
+.rmRoot .guideT{ color: var(--muted); }
+
+@media (max-width: 900px){
+  .rmRoot .guideGrid{ grid-template-columns: 1fr; }
+}
 .rmRoot .modalFooter{
   padding: 12px 14px;
   border-top: 1px solid var(--border);
@@ -287,7 +379,7 @@
 }
 .rmRoot .previewScore{
   font-size: 28px;
-  font-weight: 900;
+  font-weight: bold;
   letter-spacing: -0.6px;
   color: var(--text);
 }
@@ -295,6 +387,9 @@
   display:flex;
   flex-direction: column;
   gap: 8px;
+  font-size: 14px;
+  color: green;
+  font-weight: bold;
 }
 .rmRoot .exRow{
   display:flex;
@@ -306,7 +401,7 @@
   border: 1px solid var(--border);
   background: var(--surface);
 }
-.rmRoot .exKey{ font-weight: 900; color: var(--muted); font-size: 14px; }
+.rmRoot .exKey{ font-weight: 900; color: black; font-size: 14px; }
 .rmRoot .exVal{ font-weight: 900; }
 .rmRoot .previewBullets{
   margin: 0;

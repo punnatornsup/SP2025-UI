@@ -242,17 +242,17 @@
   word-break: break-word;
 }
 
-.tagWrap{
+.modalShell .tagWrap{
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.pill{
+.modalShell .pill{
   display: inline-flex;
   align-items: center;
   padding: 4px 8px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--surface-3);
   border: 1px solid var(--border);
   font-size: 12px;
@@ -268,7 +268,7 @@
 .commentBox{
   width: 100%;
   min-height: 110px;
-  border-radius: 12px;
+  border-radius: var(--r-md);
   border: 1px solid var(--control-border);
   background: var(--control-bg);
   color: var(--control-text);

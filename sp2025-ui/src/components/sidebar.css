@@ -34,8 +34,8 @@
 .logoBox{
   width: 52px;
   height: 52px;
-  border-radius: 14px;
-  background: rgb(255, 255, 255);
+  border-radius: var(--r-lg);
+  background: var(--sidebar-logo-bg);
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -69,7 +69,7 @@
 .navIconBtn{
   width: 44px;
   height: 44px;
-  border-radius: 14px;
+  border-radius: var(--r-lg);
 
   display: flex;
   align-items: center;
@@ -86,7 +86,7 @@
 
 .navIconBtn.active{
   background: var(--sidebar-active);
-  color: #fff;
+  color: var(--sidebar-active-text);
 }
 
 .navIcon{

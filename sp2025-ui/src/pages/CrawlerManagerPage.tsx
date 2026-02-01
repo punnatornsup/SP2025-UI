@@ -104,7 +104,7 @@ export default function CrawlerManagerPage() {
   // ===== validation (UX) =====
   // Requirement:
   // - Add crawler: required all fields EXCEPT Description
-  // - Cookies: every visible row must be filled (name + value). Must fill the 1st row before adding more.
+  // - Cookies: optional (if a row is incomplete, it will be ignored on Save). You can only add a new row after completing the current row.
   // - Add schedule: required Name
   const crawlerValidation = useMemo(() => {
     const errors: Record<string, string> = {};
@@ -114,7 +114,9 @@ export default function CrawlerManagerPage() {
     const startUrl = pStartUrl.trim();
     const alertTo = pAlertTo.trim();
 
-    // Cookies: all rows must be complete (no partial)
+    // Cookies are OPTIONAL:
+    // - Do not block Save if empty/incomplete
+    // - Only allow adding a new row when all existing rows are complete (to prevent many half-filled rows)
     const cookieRows = (pCookies ?? []).map((r) => ({
       name: (r.name ?? "").trim(),
       value: (r.value ?? "").trim(),
@@ -126,14 +128,13 @@ export default function CrawlerManagerPage() {
     if (domains.length === 0) errors.pDomains = "Allow domain is required";
     if (!startUrl) errors.pStartUrl = "Start url is required";
     if (!alertTo) errors.pAlertTo = "To alert email is required";
-    if (cookieCount === 0 || anyCookieRowEmpty) errors.pCookies = "Cookies: every row must have name and value";
 
     return {
       errors,
       canSave: Object.keys(errors).length === 0,
       canAddCookieRow: cookieCount > 0 && !anyCookieRowEmpty,
     };
-  }, [pName, pDomains, pStartUrl, pAlertTo, pCookies]);
+}, [pName, pDomains, pStartUrl, pAlertTo, pCookies]);
 
   const scheduleValidation = useMemo(() => {
     const errors: Record<string, string> = {};
@@ -583,7 +584,7 @@ export default function CrawlerManagerPage() {
                       disabled={r.status === "SUCCESS" || r.status === "FAILED" || r.status === "CANCELED"}
                       title="Cancel running job"
                     >
-                      Cancel
+                      REVOKE
                     </button>
                   </td>
                 </tr>
@@ -753,30 +754,23 @@ export default function CrawlerManagerPage() {
                     )}
                   </label>
 
+                  
                   <div className="field">
-                    <div className="label">
-                      Cookies (Cookie_name, value)<span className="req">*</span>
-                    </div>
+                    <div className="label">Cookies (optional)</div>
 
                     <div className="cookieList">
-                      {pCookies.map((c, idx) => {
-                        const nameMissing = (c.name ?? "").trim().length === 0;
-                        const valueMissing = (c.value ?? "").trim().length === 0;
-                        const rowInvalid = nameMissing || valueMissing;
-                        return (
+                      {pCookies.map((c, idx) => (
                         <div className="cookieRow" key={idx}>
                           <input
-                            className={`input ${showCrawlerError("pCookies") && rowInvalid && nameMissing ? "inputInvalid" : ""}`}
+                            className="input"
                             value={c.name}
                             onChange={(e) => updateCookieRow(idx, { name: e.target.value })}
-                            onBlur={() => markCrawlerTouched("pCookies")}
                             placeholder="Cookie_name"
                           />
                           <input
-                            className={`input ${showCrawlerError("pCookies") && rowInvalid && valueMissing ? "inputInvalid" : ""}`}
+                            className="input"
                             value={c.value}
                             onChange={(e) => updateCookieRow(idx, { value: e.target.value })}
-                            onBlur={() => markCrawlerTouched("pCookies")}
                             placeholder="value"
                           />
 
@@ -789,8 +783,7 @@ export default function CrawlerManagerPage() {
                             Remove
                           </button>
                         </div>
-                      );
-                      })}
+                      ))}
                     </div>
 
                     <button
@@ -800,22 +793,21 @@ export default function CrawlerManagerPage() {
                       title={
                         crawlerValidation.canAddCookieRow
                           ? "Add new cookie row"
-                          : "Fill current cookie row (name + value) before adding a new one"
+                          : "Complete the current cookie row (name + value) before adding a new one"
                       }
                     >
                       + Add cookie row
                     </button>
 
-                    {showCrawlerError("pCookies") && crawlerValidation.errors.pCookies && (
-                      <div className="fieldError">{crawlerValidation.errors.pCookies}</div>
-                    )}
                     <div className="hint">
-                      ต้องกรอกครบทุกแถว (name + value) และต้องกรอกแถวแรกให้ครบก่อนถึงจะเพิ่มแถวใหม่ได้
+                      Optional: ถ้าแถวไหนกรอกไม่ครบ (มีแค่ name หรือ value) ระบบจะ <span className="bold">ไม่บันทึกแถวนั้น</span> ตอนกด Save
+                      (เพื่อกันแถวว่าง ๆ การเพิ่มแถวใหม่จะให้กรอกแถวปัจจุบันให้ครบก่อน)
                     </div>
                   </div>
 
                   <div className="field">
                     <label className="check">
+
                       <input type="checkbox" checked={pBypass} onChange={(e) => setPBypass(e.target.checked)} />
                       <span>Bypass ddos</span>
                     </label>
@@ -995,7 +987,7 @@ export default function CrawlerManagerPage() {
 
               {modal === "CANCEL_JOB" && (
                 <div className="confirmBox">
-                  <div className="confirmTitle">Confirm cancel?</div>
+                  <div className="confirmTitle">Confirm revoke?</div>
                   <div className="confirmText">
                     Job: <span className="mono">{activeJob?.job_id}</span>
                   </div>
@@ -1013,10 +1005,9 @@ export default function CrawlerManagerPage() {
 
               {(modal === "ADD_CRAWLER" || modal === "EDIT_CRAWLER") && (
                 <button
-                  className="primaryBtn"
+                  className={`primaryBtn ${!crawlerValidation.canSave ? "btnSoftWarn" : ""}`}
                   onClick={saveCrawler}
-                  disabled={!crawlerValidation.canSave}
-                  title={!crawlerValidation.canSave ? "Fill required fields to enable Save" : "Save crawler"}
+                  title={!crawlerValidation.canSave ? "Click Save to see missing fields" : "Save crawler"}
                 >
                   Save
                 </button>
@@ -1024,10 +1015,9 @@ export default function CrawlerManagerPage() {
 
               {(modal === "ADD_SCHEDULE" || modal === "EDIT_SCHEDULE") && (
                 <button
-                  className="primaryBtn"
+                  className={`primaryBtn ${!scheduleValidation.canSave ? "btnSoftWarn" : ""}`}
                   onClick={saveSchedule}
-                  disabled={!scheduleValidation.canSave}
-                  title={!scheduleValidation.canSave ? "Fill required fields to enable Save" : "Save schedule"}
+                  title={!scheduleValidation.canSave ? "Click Save to see missing fields" : "Save schedule"}
                 >
                   Save
                 </button>
@@ -1035,7 +1025,7 @@ export default function CrawlerManagerPage() {
 
               {modal === "CANCEL_JOB" && (
                 <button className="dangerBtn" onClick={confirmCancelJob}>
-                  Confirm cancel
+                  Confirm revoke
                 </button>
               )}
             </div>
